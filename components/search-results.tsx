@@ -83,7 +83,7 @@ export function SearchResults({ query }: { query: string }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <Badge variant="outline" className="border-purple-500/30 bg-purple-500/10 px-3 py-1 text-purple-300">
+        <Badge variant="outline" className="border-teal-500/30 bg-teal-500/10 px-3 py-1 text-teal-300">
           Found {results.length} certificate(s)
         </Badge>
       </div>
@@ -95,10 +95,10 @@ export function SearchResults({ query }: { query: string }) {
             key={certificate.id}
             className="transition-transform hover:scale-[1.02]"
           >
-            <Card className="h-full overflow-hidden border-none bg-slate-800/50 transition-all hover:bg-slate-800/80 hover:shadow-lg hover:shadow-purple-900/20 backdrop-blur-sm">
+            <Card className="h-full overflow-hidden border-none bg-slate-800/50 transition-all hover:bg-slate-800/80 hover:shadow-lg hover:shadow-teal-900/20 backdrop-blur-sm">
               <CardContent className="p-4">
                 <div className="flex flex-col space-y-3">
-                  <div className="flex items-center space-x-2 text-purple-400">
+                  <div className="flex items-center space-x-2 text-teal-400">
                     <Award className="h-5 w-5" />
                     <span className="font-medium line-clamp-1">{certificate.courseTitle}</span>
                   </div>

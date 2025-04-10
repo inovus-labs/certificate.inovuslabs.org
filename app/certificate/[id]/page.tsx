@@ -39,20 +39,29 @@ export default async function CertificatePage({
   })
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-purple-950">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-teal-950">
       <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Link href="/">
               <div className="flex items-center space-x-2">
-                <Image src="/inovus-logo.svg" alt="Inovus Labs" width={180} height={48} />
+                <Image src="/inovus-logo.png" alt="Inovus Labs" width={180} height={48} className="h-10 w-auto" />
               </div>
             </Link>
 
-            <div className="flex items-center space-x-4">
+            <div className="hidden md:flex items-center space-x-4">
               <Link href="/">
-                <Button variant="ghost" className="text-purple-300 hover:text-purple-100 hover:bg-purple-900/50">
+                <Button variant="ghost" className="text-teal-300 hover:text-teal-100 hover:bg-teal-900/50">
                   Verify Another Certificate
+                </Button>
+              </Link>
+            </div>
+
+            <div className="md:hidden">
+              <Link href="/">
+                <Button variant="ghost" size="sm" className="text-teal-300 hover:text-teal-100 hover:bg-teal-900/50">
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Back
                 </Button>
               </Link>
             </div>
@@ -65,7 +74,7 @@ export default async function CertificatePage({
           <Link href="/">
             <Button
               variant="ghost"
-              className="flex items-center gap-2 text-purple-300 hover:text-purple-100 hover:bg-purple-900/50"
+              className="hidden md:flex items-center gap-2 text-teal-300 hover:text-teal-100 hover:bg-teal-900/50"
             >
               <ChevronLeft className="h-4 w-4" />
               Back to Search
@@ -105,7 +114,7 @@ export default async function CertificatePage({
 
                 <div className="mt-4 space-y-4">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-500/20 text-purple-400">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-500/20 text-teal-400">
                       <Fingerprint className="h-5 w-5" />
                     </div>
                     <div>
@@ -115,7 +124,7 @@ export default async function CertificatePage({
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-500/20 text-purple-400">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-500/20 text-teal-400">
                       <User className="h-5 w-5" />
                     </div>
                     <div>
@@ -125,7 +134,7 @@ export default async function CertificatePage({
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-500/20 text-purple-400">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-500/20 text-teal-400">
                       <Award className="h-5 w-5" />
                     </div>
                     <div>
@@ -135,7 +144,7 @@ export default async function CertificatePage({
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-500/20 text-purple-400">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-500/20 text-teal-400">
                       <Calendar className="h-5 w-5" />
                     </div>
                     <div>
@@ -146,7 +155,7 @@ export default async function CertificatePage({
 
                   {certificate.duration && (
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-500/20 text-purple-400">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-500/20 text-teal-400">
                         <Clock className="h-5 w-5" />
                       </div>
                       <div>
@@ -181,7 +190,7 @@ export default async function CertificatePage({
               </div>
 
               <div className="flex gap-2">
-                <Button className="flex-1 gap-2 bg-purple-600 hover:bg-purple-700">
+                <Button className="flex-1 gap-2 bg-teal-600 hover:bg-teal-700">
                   <Download className="h-4 w-4" />
                   Download Certificate
                 </Button>
@@ -192,7 +201,7 @@ export default async function CertificatePage({
                       <Button
                         variant="outline"
                         size="icon"
-                        className="border-purple-500/30 bg-slate-800 text-purple-400 hover:bg-slate-700 hover:text-purple-300"
+                        className="border-teal-500/30 bg-slate-800 text-teal-400 hover:bg-slate-700 hover:text-teal-300"
                       >
                         <Share2 className="h-4 w-4" />
                       </Button>

@@ -15,13 +15,13 @@ export default function SearchPage({
   const query = searchParams.q || ""
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-purple-950">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-teal-950">
       <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Link href="/">
               <div className="flex items-center space-x-2">
-                <Image src="/inovus-logo.svg" alt="Inovus Labs" width={180} height={48} />
+                <Image src="/inovus-logo.png" alt="Inovus Labs" width={180} height={48} className="h-10 w-auto" />
               </div>
             </Link>
           </div>
@@ -33,7 +33,7 @@ export default function SearchPage({
           <Link href="/">
             <Button
               variant="ghost"
-              className="flex items-center gap-2 text-purple-300 hover:text-purple-100 hover:bg-purple-900/50"
+              className="flex items-center gap-2 text-teal-300 hover:text-teal-100 hover:bg-teal-900/50"
             >
               <ChevronLeft className="h-4 w-4" />
               Back to Home
@@ -43,8 +43,8 @@ export default function SearchPage({
 
         <div className="mb-8 rounded-lg bg-slate-800/50 p-6 backdrop-blur-sm">
           <div className="flex items-center gap-3">
-            <div className="rounded-full bg-purple-500/20 p-2">
-              <SearchIcon className="h-5 w-5 text-purple-400" />
+            <div className="rounded-full bg-teal-500/20 p-2">
+              <SearchIcon className="h-5 w-5 text-teal-400" />
             </div>
             <div>
               <h1 className="text-2xl font-bold text-white">Search Results</h1>

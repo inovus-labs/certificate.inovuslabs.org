@@ -50,7 +50,7 @@ export function CertificateVerification({ certificateId }: { certificateId: stri
                 Click the button below to verify this certificate on the blockchain
               </p>
             </div>
-            <Button onClick={handleVerify} className="mt-2 bg-purple-600 hover:bg-purple-700">
+            <Button onClick={handleVerify} className="mt-2 bg-teal-600 hover:bg-teal-700">
               <Fingerprint className="mr-2 h-4 w-4" />
               Verify Certificate
             </Button>
@@ -61,12 +61,12 @@ export function CertificateVerification({ certificateId }: { certificateId: stri
           <div className="space-y-4 rounded-lg border border-slate-700 p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-purple-400" />
+                <Shield className="h-5 w-5 text-teal-400" />
                 <span className="text-sm font-medium text-white">Verifying certificate authenticity...</span>
               </div>
               <span className="text-sm text-slate-400">{progress}%</span>
             </div>
-            <Progress value={progress} className="h-2 bg-slate-700" indicatorClassName="bg-purple-500" />
+            <Progress value={progress} className="h-2 bg-slate-700" indicatorClassName="bg-teal-500" />
             <div className="space-y-2 text-xs text-slate-400">
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-3.5 w-3.5 text-emerald-400" />
@@ -125,7 +125,7 @@ export function CertificateVerification({ certificateId }: { certificateId: stri
 
             <div className="flex items-center justify-between rounded-md bg-slate-800 p-3">
               <span className="text-xs text-slate-400">Verification Hash</span>
-              <Button variant="ghost" size="sm" className="h-6 text-xs text-purple-400 hover:text-purple-300">
+              <Button variant="ghost" size="sm" className="h-6 text-xs text-teal-400 hover:text-teal-300">
                 View on Explorer
               </Button>
             </div>

@@ -3,37 +3,25 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Award, CheckCircle, SearchIcon, Shield } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { SiteHeader } from "@/components/site-header"
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-purple-950">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-teal-950">
+
       <div className="container mx-auto px-4 py-8">
-        <header className="flex items-center justify-between py-6">
-          <div className="flex items-center gap-2">
-            <Image src="/inovus-logo.svg" alt="Inovus Labs" width={180} height={48} priority />
-          </div>
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" className="text-purple-300 hover:text-purple-100 hover:bg-purple-900/50">
-              About
-            </Button>
-            <Button variant="ghost" className="text-purple-300 hover:text-purple-100 hover:bg-purple-900/50">
-              Contact
-            </Button>
-            <Button className="bg-purple-600 text-white hover:bg-purple-700">Admin Login</Button>
-          </div>
-        </header>
+        <SiteHeader />
 
         <div className="flex flex-col items-center justify-center space-y-12 py-16 text-center">
           <div className="space-y-6">
             <Badge
               variant="outline"
-              className="border-purple-500/30 bg-purple-500/10 px-4 py-1.5 text-sm font-medium text-purple-300"
+              className="border-teal-500/30 bg-teal-500/10 px-4 py-1.5 text-sm font-medium text-teal-300"
             >
               Certificate Verification Platform
             </Badge>
             <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl">
-              Verify Your <span className="text-purple-400">Credentials</span>
+              Verify Your <span className="text-teal-400">Credentials</span>
             </h1>
             <p className="mx-auto max-w-2xl text-xl text-slate-300">
               Instantly verify the authenticity of your Inovus Labs certificates with our secure blockchain-powered
@@ -58,7 +46,7 @@ export default function HomePage() {
           <div className="grid gap-8 pt-8 md:grid-cols-3">
             <Card className="border-none bg-slate-800/50 shadow-xl backdrop-blur-sm">
               <CardContent className="flex flex-col items-center p-6 text-center">
-                <div className="mb-4 rounded-full bg-purple-500/20 p-3 text-purple-400">
+                <div className="mb-4 rounded-full bg-teal-500/20 p-3 text-teal-400">
                   <SearchIcon className="h-6 w-6" />
                 </div>
                 <h3 className="mb-2 text-lg font-medium text-white">Search</h3>
@@ -70,7 +58,7 @@ export default function HomePage() {
 
             <Card className="border-none bg-slate-800/50 shadow-xl backdrop-blur-sm">
               <CardContent className="flex flex-col items-center p-6 text-center">
-                <div className="mb-4 rounded-full bg-purple-500/20 p-3 text-purple-400">
+                <div className="mb-4 rounded-full bg-teal-500/20 p-3 text-teal-400">
                   <Shield className="h-6 w-6" />
                 </div>
                 <h3 className="mb-2 text-lg font-medium text-white">Verify</h3>
@@ -82,7 +70,7 @@ export default function HomePage() {
 
             <Card className="border-none bg-slate-800/50 shadow-xl backdrop-blur-sm">
               <CardContent className="flex flex-col items-center p-6 text-center">
-                <div className="mb-4 rounded-full bg-purple-500/20 p-3 text-purple-400">
+                <div className="mb-4 rounded-full bg-teal-500/20 p-3 text-teal-400">
                   <Award className="h-6 w-6" />
                 </div>
                 <h3 className="mb-2 text-lg font-medium text-white">Download</h3>
@@ -93,27 +81,35 @@ export default function HomePage() {
         </div>
       </div>
 
-      <footer className="border-t border-slate-800 bg-slate-900/50 py-8 backdrop-blur-sm">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-            <div className="flex items-center gap-2">
-              <Image src="/inovus-logo.svg" alt="Inovus Labs" width={120} height={32} />
-              <span className="text-sm text-slate-400">© {new Date().getFullYear()} Inovus Labs</span>
-            </div>
-            <div className="flex items-center gap-6">
-              <a href="#" className="text-sm text-slate-400 hover:text-purple-400">
-                Privacy Policy
-              </a>
-              <a href="#" className="text-sm text-slate-400 hover:text-purple-400">
-                Terms of Service
-              </a>
-              <a href="#" className="text-sm text-slate-400 hover:text-purple-400">
-                Contact Us
-              </a>
+      <footer className="bg-slate-950 border-t border-slate-800 lg:py-5 py-10 text-slate-400">
+        <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
+
+          <div className="flex gap-6 flex-wrap items-center justify-center md:justify-start">
+            <div className="flex flex-row items-center gap-6">
+              <img src="/badges/opensource.svg" alt="Open Source" className="h-8 w-auto" />
+              <img src="/badges/carbonneutral.svg" alt="Carbon Neutral" className="h-8 w-auto" />
             </div>
           </div>
+
+          <div className="flex flex-col items-center md:items-start text-center md:text-left">
+            <p className="mt-2 text-slate-500 text-sm">
+              Built with ❤️ by <a href="https://inovuslabs.org" target="blank" className="text-slate-400 hover:text-teal-400 transition">Inovus Labs</a>
+            </p>
+          </div>
+
+          <div className="text-center md:text-right text-sm text-slate-500">
+            <span className="text-xs text-slate-500">
+              <a href="#" className="text-slate-400 hover:text-teal-400 transition">Privacy Policy</a> | <a href="#" className="text-slate-400 hover:text-teal-400 transition">Terms of Service</a>
+            </span>
+            <br />
+            <span className="text-xs text-slate-500">
+              © {new Date().getFullYear()} Inovus Labs. All rights reserved.
+            </span>
+          </div>
+
         </div>
       </footer>
+
     </div>
   )
 }

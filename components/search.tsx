@@ -60,12 +60,12 @@ export function Search() {
           placeholder="Enter certificate ID or full name"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="h-14 w-full rounded-full border-2 border-purple-500/30 bg-slate-900/50 pl-6 pr-14 text-lg text-white shadow-inner shadow-purple-900/20 transition-all focus-visible:border-purple-500 focus-visible:ring-purple-500"
+          className="h-14 w-full rounded-full border-2 border-teal-500/30 bg-slate-900/50 pl-6 pr-14 text-lg text-white shadow-inner shadow-teal-900/20 transition-all focus-visible:border-teal-500 focus-visible:ring-teal-500"
         />
         <Button
           type="submit"
           size="icon"
-          className="absolute right-2 top-2 h-10 w-10 rounded-full bg-purple-600 transition-colors hover:bg-purple-700"
+          className="absolute right-2 top-2 h-10 w-10 rounded-full bg-teal-600 transition-colors hover:bg-teal-700"
           disabled={isLoading}
         >
           {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <SearchIcon className="h-5 w-5" />}
