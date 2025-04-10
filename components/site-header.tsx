@@ -9,6 +9,22 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose 
 export function SiteHeader() {
   const [isOpen, setIsOpen] = useState(false)
 
+  const openPage = (url: string) => {
+    window.open(url, "_blank")
+    setIsOpen(false)
+  }
+  const handleButtonClick = (url: string) => {
+    if (url === "website") {
+      openPage("https://inovuslabs.org")
+    } else if (url === "blog") {
+      openPage("https://blog.inovuslabs.org?utm_source=certificate_validator")
+    } else if (url === "podcast") {
+      openPage("https://inovuslabs.org/inora")
+    } else if (url === "github") {
+      openPage("https://github.com/inovus-labs")
+    }
+  }
+
   return (
     <header className="flex items-center justify-between py-6">
       <div className="flex items-center gap-2">
@@ -17,24 +33,31 @@ export function SiteHeader() {
 
       {/* Desktop Navigation */}
       <div className="hidden items-center gap-4 md:flex">
-        <Button variant="ghost" className="text-teal-300 hover:text-teal-100 hover:bg-teal-900/50">
-          About
+        <Button variant="ghost" className="text-teal-300 hover:text-teal-100 hover:bg-teal-900/50" onClick={() => handleButtonClick("blog")}>
+          Blog
         </Button>
-        <Button variant="ghost" className="text-teal-300 hover:text-teal-100 hover:bg-teal-900/50">
-          Contact
+        <Button variant="ghost" className="text-teal-300 hover:text-teal-100 hover:bg-teal-900/50" onClick={() => handleButtonClick("podcast")}>
+          Podcast
         </Button>
-        <Button className="bg-teal-600 text-white hover:bg-teal-700">Admin Login</Button>
+        <Button variant="ghost" className="text-teal-300 hover:text-teal-100 hover:bg-teal-900/50" onClick={() => handleButtonClick("github")}>
+          Project
+        </Button>
+        <Button variant="ghost" className="bg-teal-600 text-white hover:bg-teal-700" onClick={() => handleButtonClick("website")}>
+          Official Website
+        </Button>
       </div>
 
       {/* Mobile Navigation */}
       <div className="md:hidden">
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
+
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" className="text-teal-300 hover:text-teal-100 hover:bg-teal-900/50">
               <Menu className="h-6 w-6" />
               <span className="sr-only">Toggle menu</span>
             </Button>
           </SheetTrigger>
+          
           <SheetContent className="bg-slate-900 border-slate-800">
             <SheetHeader>
               <SheetTitle className="text-white">
@@ -48,20 +71,36 @@ export function SiteHeader() {
                 <Button
                   variant="ghost"
                   className="justify-start text-teal-300 hover:text-teal-100 hover:bg-teal-900/50"
+                  onClick={() => handleButtonClick("blog")}
                 >
-                  About
+                  Blog
                 </Button>
               </SheetClose>
               <SheetClose asChild>
                 <Button
                   variant="ghost"
                   className="justify-start text-teal-300 hover:text-teal-100 hover:bg-teal-900/50"
+                  onClick={() => handleButtonClick("podcast")}
                 >
-                  Contact
+                  Podcast
                 </Button>
               </SheetClose>
               <SheetClose asChild>
-                <Button className="justify-start bg-teal-600 text-white hover:bg-teal-700">Admin Login</Button>
+                <Button
+                  variant="ghost"
+                  className="justify-start text-teal-300 hover:text-teal-100 hover:bg-teal-900/50"
+                  onClick={() => handleButtonClick("github")}
+                >
+                  Project
+                </Button>
+              </SheetClose>
+              <SheetClose asChild>
+                <Button
+                  className="justify-start bg-teal-600 text-white hover:bg-teal-700"
+                  onClick={() => handleButtonClick("website")}
+                >
+                  Official Website
+                </Button>
               </SheetClose>
             </div>
           </SheetContent>

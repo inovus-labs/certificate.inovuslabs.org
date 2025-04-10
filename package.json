@@ -1,10 +1,13 @@
 {
-  "name": "my-v0-project",
+  "name": "inovus-certificate-validator",
   "version": "0.1.0",
+  "description": "A web application for validating the certificates issued by Inovus Labs.",
+  "author": "Arjun Krishna",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "NODE_ENV=production next build",
     "start": "next start",
     "lint": "next lint"
   },
