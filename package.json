@@ -7,10 +7,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "NODE_ENV=production next build",
-    "export": "next export",
+    "prebuild": "next build",
+    "build": "next build && next export",
     "start": "next start",
     "lint": "next lint"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
