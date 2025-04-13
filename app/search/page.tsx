@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { ChevronLeft, SearchIcon } from "lucide-react"
 import { SearchResults } from "@/components/search-results"
 import { Skeleton } from "@/components/ui/skeleton"
+import { SiteFooter } from "@/components/site-footer"
 
 export default function SearchPage({
   searchParams,
@@ -15,7 +16,7 @@ export default function SearchPage({
   const query = searchParams.q || ""
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-teal-950">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-950 via-slate-900 to-teal-950">
       <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
@@ -28,7 +29,7 @@ export default function SearchPage({
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 flex-grow">
         <div className="mb-8">
           <Link href="/">
             <Button
@@ -71,6 +72,8 @@ export default function SearchPage({
           <SearchResults query={query} />
         </Suspense>
       </div>
+
+      <SiteFooter />
     </div>
   )
 }

@@ -20,6 +20,9 @@ import { getCertificateById } from "@/lib/certificates"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { CertificateVerification } from "@/components/certificate-verification"
+import { QrCodeModal } from "@/components/qr-code-modal"
+import { CourseDetails } from "@/components/course-details"
+import { SiteFooter } from "@/components/site-footer"
 
 export default async function CertificatePage({
   params,
@@ -39,7 +42,7 @@ export default async function CertificatePage({
   })
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-teal-950">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-950 via-slate-900 to-teal-950">
       <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
@@ -69,7 +72,7 @@ export default async function CertificatePage({
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 flex-grow">
         <div className="mb-6 flex items-center justify-between">
           <Link href="/">
             <Button
@@ -91,9 +94,10 @@ export default async function CertificatePage({
           <div className="lg:col-span-2">
             <Card className="overflow-hidden border-none bg-slate-800/50 p-6 shadow-lg backdrop-blur-sm lg:p-8">
               <div className="relative mb-6">
-                <div className="absolute -right-4 -top-4 rounded-full bg-emerald-500/10 p-2">
-                  <QrCode className="h-8 w-8 text-emerald-300" />
+                <div className="absolute -right-3 -top-3 rounded-full bg-emerald-500/10 p-2">
+                  <QrCode className="h-6 w-6 text-emerald-300" />
                 </div>
+                <QrCodeModal certificateId={certificate.id} recipientName={certificate.recipientName} />
                 <Image
                   src="/certificate-template.png"
                   alt="Certificate"
@@ -215,7 +219,13 @@ export default async function CertificatePage({
             </div>
           </div>
         </div>
+
+        <div className="mt-12">
+          <CourseDetails certificate={certificate} />
+        </div>
       </main>
+
+      <SiteFooter />
     </div>
   )
 }

@@ -28,7 +28,7 @@ export function CertificateVerification({ certificateId }: { certificateId: stri
   }
 
   return (
-    <div className="mt-6 rounded-lg bg-slate-900/80 p-6">
+    <div className="mt-6 rounded-lg bg-slate-900/80 p-4 lg:p-6">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-white">Certificate Verification</h3>
 
@@ -95,14 +95,14 @@ export function CertificateVerification({ certificateId }: { certificateId: stri
         )}
 
         {verificationState === "verified" && (
-          <div className="space-y-4 rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-6">
+          <div className="space-y-4 rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-4 lg:p-6">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/20">
+              <div className="flex min-h-10 min-w-10 items-center justify-center rounded-full bg-emerald-500/20">
                 <Shield className="h-5 w-5 text-emerald-400" />
               </div>
-              <div>
+              <div className="flex flex-col gap-2">
                 <h4 className="text-lg font-medium text-white">Certificate Verified</h4>
-                <p className="text-sm text-slate-300">
+                <p className="text-xs lg:text-sm text-slate-300">
                   This certificate has been verified as authentic on the blockchain
                 </p>
               </div>
