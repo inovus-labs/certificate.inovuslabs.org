@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { SearchIcon, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -12,8 +12,23 @@ import { useToast } from "@/hooks/use-toast"
 export function Search() {
   const [query, setQuery] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 768px)")  
+    const handleMediaChange = (e: MediaQueryListEvent) => {
+      setIsMobile(e.matches)
+    }
+  
+    setIsMobile(mediaQuery.matches)
+    mediaQuery.addEventListener("change", handleMediaChange)
+  
+    return () => {
+      mediaQuery.removeEventListener("change", handleMediaChange)
+    }
+  }, [])
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -57,7 +72,7 @@ export function Search() {
       <div className="relative">
         <Input
           type="text"
-          placeholder="Enter certificate ID or full name"
+          placeholder={isMobile ? "Search..." : "Enter certificate ID or full name"}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="h-14 w-full rounded-full border-2 border-teal-500/30 bg-slate-900/50 pl-6 pr-14 text-lg text-white shadow-inner shadow-teal-900/20 transition-all focus-visible:border-teal-500 focus-visible:ring-teal-500"
