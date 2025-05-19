@@ -2,6 +2,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+import axios from 'axios';
 import { ethers } from 'ethers';
 import { Request, Response } from 'express';
 
@@ -9,14 +10,18 @@ import { Certificate, RevokedCertificate } from '../models';
 import CertificateValidator from '../abi/CertificateValidator.json';
 
 
+const etherscanApiUrl = "https://api-sepolia.etherscan.io"
 
 const contractAddress = process.env.CONTRACT_ADDRESS;
 const rpcUrl = process.env.ALCHEMY_SEPOLIA_RPC_URL;
 const privateKey = process.env.PRIVATE_KEY;
+const etherscanApiKey = process.env.ETHERSCAN_API_KEY;
 
-if (!contractAddress || !rpcUrl || !privateKey) {
+
+if (!contractAddress || !rpcUrl || !privateKey || !etherscanApiKey) {
   throw new Error('Missing CONTRACT_ADDRESS, ALCHEMY_SEPOLIA_RPC_URL, or PRIVATE_KEY in environment variables');
 }
+
 
 const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
 const signer = new ethers.Wallet(privateKey, provider);
@@ -91,16 +96,17 @@ export const verifyCertificate = async (req: Request, res: Response) => {
 
   try {
     const isValid = await contract.verifyHash(hash);
-    const record = await Certificate.findOne({ hash });
 
-    if (!isValid || !record) return res.status(404).json({ valid: false });
+    if (!isValid) {
+      return res.status(404).json({
+        message: 'Certificate does not exist on Blockchain',
+        valid: false
+      });
+    }
 
     return res.status(200).json({
-      valid: true,
-      hash,
-      txHash: record.txHash,
-      explorerUrl: `https://sepolia.etherscan.io/tx/${record.txHash}`,
-      metadata: record.metadata,
+      message: 'Certificate exists on Blockchain',
+      valid: true
     });
   } catch (err: any) {
     console.error("Error verifying certificate: ", err);
@@ -126,3 +132,40 @@ export const getCertificateById = async (req: Request, res: Response) => {
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
+
+
+// Get Transaction by Hash
+export const getTransactionByHash = async (req: Request, res: Response) => {
+  const { txHash } = req.params;
+  try {
+    const etherscanUrl = `${etherscanApiUrl}/api?chainid=1&module=proxy&action=eth_getTransactionByHash&txhash=${txHash}&apikey=${etherscanApiKey}`;
+
+    const response = await axios.get(etherscanUrl);
+    const transaction = response.data.result;
+    if (!transaction) {
+      return res.status(404).json({ error: 'Transaction not found' });
+    }
+    const { blockHash, blockNumber, from, to, gas } = transaction;
+    const transactionDetails = {
+      blockHash,
+      blockNumber,
+      from,
+      to,
+      // gas,
+      // status: transaction.isError === '0' ? 'Success' : 'Failed',
+    };
+    return res.status(200).json({
+      message: 'Transaction details fetched successfully',
+      data: {
+        ...transactionDetails,
+        network: 'Sepolia Testnet',
+        explorerUrl: `https://sepolia.etherscan.io/tx/${txHash}`,
+      }
+    });
+    
+  } catch (err: any) {
+    console.error("Error fetching transaction: ", err);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
