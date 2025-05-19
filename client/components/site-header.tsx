@@ -28,7 +28,7 @@ export function SiteHeader() {
   return (
     <header className="flex items-center justify-between py-6">
       <div className="flex items-center gap-2">
-        <Image src="/inovus-logo.png" alt="Inovus Labs" width={180} height={48} priority className="h-12 w-auto" />
+        <Image src="/inovus-logo.png" priority={true} alt="Inovus Labs" width={180} height={48} priority className="h-12 w-auto" />
       </div>
 
       {/* Desktop Navigation */}
@@ -62,7 +62,7 @@ export function SiteHeader() {
             <SheetHeader>
               <SheetTitle className="text-white">
                 <div className="flex items-center gap-2 mb-6">
-                  <Image src="/inovus-logo.png" alt="Inovus Labs" width={150} height={40} className="h-10 w-auto" />
+                  <Image src="/inovus-logo.png" priority={true} alt="Inovus Labs" width={150} height={40} className="h-10 w-auto" />
                 </div>
               </SheetTitle>
             </SheetHeader>

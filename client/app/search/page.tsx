@@ -22,7 +22,7 @@ export default function SearchPage({
           <div className="flex items-center justify-between">
             <Link href="/">
               <div className="flex items-center space-x-2">
-                <Image src="/inovus-logo.png" alt="Inovus Labs" width={180} height={48} className="h-10 w-auto" />
+                <Image src="/inovus-logo.png" priority={true} alt="Inovus Labs" width={180} height={48} className="h-10 w-auto" />
               </div>
             </Link>
           </div>

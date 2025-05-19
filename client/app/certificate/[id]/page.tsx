@@ -18,6 +18,7 @@ import {
   Shield,
   Fingerprint,
   QrCode,
+  Loader2,
 } from "lucide-react"
 import { getCertificateById } from "@/lib/api"
 import { Badge } from "@/components/ui/badge"
@@ -36,6 +37,7 @@ export default function CertificatePage() {
   const [metadata, setMetadata] = useState<Certificate | null>(null)
   const [txHash, setTxHash] = useState<string | null>(null)
   const [hash, setHash] = useState<string | null>(null)
+  const [image, setImage] = useState<string | null>(null)
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -83,6 +85,7 @@ export default function CertificatePage() {
             setError(true)
             return
           }
+          setImage(data.image)
           setMetadata(data.metadata)
           setTxHash(data.txHash)
           setHash(data.hash)
@@ -98,6 +101,46 @@ export default function CertificatePage() {
     loadCertificate()
   }, [id])
 
+
+  const shareCertificate = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: `Certificate of ${metadata?.recipient_name}`,
+        text: `Check out this certificate of completion for ${metadata?.event_name}`,
+        url: window.location.href,
+      })
+      .then(() => console.log("Certificate shared successfully"))
+      .catch((error) => console.error("Error sharing certificate:", error))
+    }
+  }
+  
+
+  const downloadCertificate = async () => {
+    if (!image) return
+    try {
+      const response = await fetch(image, { mode: "cors" })
+      if (!response.ok) throw new Error("Network response was not ok")
+  
+      const blob = await response.blob()
+      const blobUrl = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+
+      a.href = blobUrl
+      a.download = `${metadata?.recipient_name}.png`
+
+      document.body.appendChild(a)
+      a.click()
+
+      document.body.removeChild(a)
+      URL.revokeObjectURL(blobUrl)
+    } catch (err) {
+      setError(true)
+      console.error("Error downloading certificate:", err)
+    }
+  }
+
+
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-950 via-slate-900 to-teal-950">
       <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md">
@@ -105,7 +148,7 @@ export default function CertificatePage() {
           <div className="flex items-center justify-between">
             <Link href="/">
               <div className="flex items-center space-x-2">
-                <Image src="/inovus-logo.png" alt="Inovus Labs" width={180} height={48} className="h-10 w-auto" />
+                <Image src="/inovus-logo.png" priority={true} alt="Inovus Labs" width={180} height={48} className="h-10 w-auto" />
               </div>
             </Link>
 
@@ -150,18 +193,31 @@ export default function CertificatePage() {
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <Card className="overflow-hidden border-none bg-slate-800/50 p-6 shadow-lg backdrop-blur-sm lg:p-8">
+            
               <div className="relative mb-6">
-                <div className="absolute -right-3 -top-3 rounded-full bg-emerald-500/10 p-2">
-                  <QrCode className="h-6 w-6 text-emerald-300" />
-                </div>
-                <QrCodeModal certificateId={metadata?.certificate_id} recipientName={metadata?.recipient_name} />
-                <Image
-                  src="/certificate-template.png"
-                  alt="Certificate"
-                  width={1000}
-                  height={700}
-                  className="rounded-lg border-4 border-slate-700 shadow-lg"
-                />
+
+                {loading ? (
+                  <div className="flex h-[500px] items-center justify-center bg-slate-900 rounded-lg border-4 border-slate-700 shadow-lg animate-pulse">
+                    <Loader2 className="h-12 w-12 animate-spin text-teal-500" />
+                  </div>
+                ) : (
+                  <>
+                    <div className="absolute -right-3 -top-3 rounded-full bg-emerald-500/10 p-2">
+                      <QrCode className="h-6 w-6 text-emerald-300" />
+                    </div>
+                    <QrCodeModal certificateId={metadata?.certificate_id} recipientName={metadata?.recipient_name} />
+                    <Image
+                      src={image}
+                      priority={true}
+                      alt="Certificate"
+                      width={1000}
+                      height={700}
+                      className="rounded-lg border-4 border-slate-700 shadow-lg"
+                      onError={() => setError(true)}
+                    />
+                  </>
+                )}
+                
               </div>
 
               <CertificateVerification metadata={metadata} txHash={txHash} hash={hash} />
@@ -217,7 +273,7 @@ export default function CertificatePage() {
               </div>
 
               <div className="flex gap-2">
-                <Button className="flex-1 gap-2 bg-teal-600 hover:bg-teal-700">
+                <Button className="flex-1 gap-2 bg-teal-600 hover:bg-teal-700" onClick={downloadCertificate}>
                   <Download className="h-4 w-4" />
                   Download Certificate
                 </Button>
@@ -229,6 +285,7 @@ export default function CertificatePage() {
                         variant="outline"
                         size="icon"
                         className="border-teal-500/30 bg-slate-800 text-teal-400 hover:bg-slate-700 hover:text-teal-300"
+                        onClick={shareCertificate}
                       >
                         <Share2 className="h-4 w-4" />
                       </Button>
