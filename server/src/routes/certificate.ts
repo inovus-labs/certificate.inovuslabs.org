@@ -1,6 +1,6 @@
 
 import { Router } from 'express';
-import { addCertificate, verifyCertificate } from '../controllers/certificateController';
+import { addCertificate, verifyCertificate } from '../controllers/certificate';
 
 const router = Router();
 

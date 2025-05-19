@@ -4,21 +4,30 @@
   "main": "dist/index.js",
   "author": "Arjun Krishna",
   "license": "MIT",
-  "description": "A Node.js application for validating certificates from Inovus Labs IEDC using Blockchain.",
+  "description": "A blockchain-based certificate validation system.",
   "scripts": {
+    "compile": "hardhat compile",
+    "export-abi": "ts-node scripts/export.ts",
+    "build-contracts": "npm run compile && npm run export-abi",
+    "deploy": "hardhat run scripts/deploy.ts --network sepolia",
     "dev": "ts-node-dev --respawn src/index.ts",
     "build": "tsc"
   },
   "dependencies": {
-    "dotenv": "^16.5.0",
-    "ethers": "^6.13.5",
+    "@openzeppelin/contracts": "^5.3.0",
     "express": "^4.18.2",
     "mongoose": "^7.0.3",
-    "nanoid": "^5.1.5"
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.2.3",
     "@types/express": "^4.17.21",
+    "@types/node": "^22.15.19",
+    "dotenv": "^16.5.0",
+    "ethers": "^5.8.0",
+    "hardhat": "^2.24.0",
+    "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.2.2"
+    "typescript": "^5.8.3"
   }
 }
