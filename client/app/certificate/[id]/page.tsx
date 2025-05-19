@@ -1,6 +1,9 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { notFound } from "next/navigation"
+import { useRouter, useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import {
@@ -16,30 +19,84 @@ import {
   Fingerprint,
   QrCode,
 } from "lucide-react"
-import { getCertificateById } from "@/lib/certificates"
+import { getCertificateById } from "@/lib/api"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { CertificateVerification } from "@/components/certificate-verification"
 import { QrCodeModal } from "@/components/qr-code-modal"
 import { CourseDetails } from "@/components/course-details"
 import { SiteFooter } from "@/components/site-footer"
+import type { Certificate } from "@/lib/types"
 
-export default async function CertificatePage({
-  params,
-}: {
-  params: { id: string }
-}) {
-  const certificate = await getCertificateById(params.id)
+export default function CertificatePage() {
+  const params = useParams()
+  const router = useRouter()
+  const id = params.id as string
 
-  if (!certificate) {
-    notFound()
-  }
+  const [metadata, setMetadata] = useState<Certificate | null>(null)
+  const [txHash, setTxHash] = useState<string | null>(null)
+  const [hash, setHash] = useState<string | null>(null)
 
-  const issueDate = new Date(certificate.issueDate).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  })
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
+
+  const certificateDetails = [
+    {
+      key: "certificate_id",
+      label: "Certificate ID",
+      icon: <Fingerprint className="h-5 w-5" />,
+      value: metadata?.certificate_id,
+      mono: true,
+    },
+    {
+      key: "recipient_name",
+      label: "Recipient",
+      icon: <User className="h-5 w-5" />,
+      value: metadata?.recipient_name,
+    },
+    {
+      key: "event_name",
+      label: "Course",
+      icon: <Award className="h-5 w-5" />,
+      value: metadata?.event_name,
+    },
+    {
+      key: "issue_date",
+      label: "Issue Date",
+      icon: <Calendar className="h-5 w-5" />,
+      value: metadata?.issue_date,
+    },
+    {
+      key: "duration",
+      label: "Duration",
+      icon: <Clock className="h-5 w-5" />,
+      value: metadata?.duration,
+    },
+  ]
+
+  useEffect(() => {
+    async function loadCertificate() {
+      try {
+        setLoading(true)
+        await getCertificateById(id).then((data) => {
+          if (!data) {
+            setError(true)
+            return
+          }
+          setMetadata(data.metadata)
+          setTxHash(data.txHash)
+          setHash(data.hash)
+        })
+      } catch (err) {
+        console.error("Error loading certificate:", err)
+        setError(true)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadCertificate()
+  }, [id])
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-950 via-slate-900 to-teal-950">
@@ -97,7 +154,7 @@ export default async function CertificatePage({
                 <div className="absolute -right-3 -top-3 rounded-full bg-emerald-500/10 p-2">
                   <QrCode className="h-6 w-6 text-emerald-300" />
                 </div>
-                <QrCodeModal certificateId={certificate.id} recipientName={certificate.recipientName} />
+                <QrCodeModal certificateId={metadata?.certificate_id} recipientName={metadata?.recipient_name} />
                 <Image
                   src="/certificate-template.png"
                   alt="Certificate"
@@ -107,7 +164,7 @@ export default async function CertificatePage({
                 />
               </div>
 
-              <CertificateVerification certificateId={certificate.id} />
+              <CertificateVerification metadata={metadata} txHash={txHash} hash={hash} />
             </Card>
           </div>
 
@@ -117,56 +174,22 @@ export default async function CertificatePage({
                 <h2 className="text-xl font-bold text-white">Certificate Details</h2>
 
                 <div className="mt-4 space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-500/20 text-teal-400">
-                      <Fingerprint className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <div className="text-xs text-slate-400">Certificate ID</div>
-                      <div className="font-mono text-sm text-slate-200">{certificate.id}</div>
-                    </div>
-                  </div>
+                  {certificateDetails.map((detail) =>
+                    detail.value && (
 
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-500/20 text-teal-400">
-                      <User className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <div className="text-xs text-slate-400">Recipient</div>
-                      <div className="text-sm text-slate-200">{certificate.recipientName}</div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-500/20 text-teal-400">
-                      <Award className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <div className="text-xs text-slate-400">Course</div>
-                      <div className="text-sm text-slate-200">{certificate.courseTitle}</div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-500/20 text-teal-400">
-                      <Calendar className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <div className="text-xs text-slate-400">Issue Date</div>
-                      <div className="text-sm text-slate-200">{issueDate}</div>
-                    </div>
-                  </div>
-
-                  {certificate.duration && (
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-500/20 text-teal-400">
-                        <Clock className="h-5 w-5" />
+                      <div key={detail.key} className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-500/20 text-teal-400">
+                          {detail.icon}
+                        </div>
+                        <div>
+                          <div className="text-xs text-slate-400">{detail.label}</div>
+                          <div className={`${detail.mono ? "font-mono" : ""} text-sm text-slate-200`}>
+                            {detail.value}
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <div className="text-xs text-slate-400">Duration</div>
-                        <div className="text-sm text-slate-200">{certificate.duration}</div>
-                      </div>
-                    </div>
+                      
+                    )
                   )}
                 </div>
               </div>
@@ -184,10 +207,10 @@ export default async function CertificatePage({
                     </div>
                   </div>
 
-                  <div className="rounded-md bg-slate-900/80 p-3">
-                    <div className="text-xs text-slate-400">Blockchain Hash</div>
+                  <div className="flex flex-col gap-1 rounded-md bg-slate-900/80 p-3">
+                    <div className="text-xs text-slate-400">Blockchain Transaction Hash</div>
                     <div className="font-mono text-xs text-slate-300 break-all">
-                      0x7f9e4b5c3d2a1e8f7c6b5a4d3c2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a7b6c5d4e3f2
+                      {txHash}
                     </div>
                   </div>
                 </div>
@@ -220,9 +243,9 @@ export default async function CertificatePage({
           </div>
         </div>
 
-        <div className="mt-12">
+        {/* <div className="mt-12">
           <CourseDetails certificate={certificate} />
-        </div>
+        </div> */}
       </main>
 
       <SiteFooter />

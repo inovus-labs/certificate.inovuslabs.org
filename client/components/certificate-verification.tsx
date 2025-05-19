@@ -5,26 +5,101 @@ import { Shield, CheckCircle, Fingerprint } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
+import axios from "@/lib/api";
 
-export function CertificateVerification({ certificateId }: { certificateId: string }) {
+export function CertificateVerification({ metadata, txHash, hash }: { metadata: any; txHash: string, hash: string }) {
+  
   const [verificationState, setVerificationState] = useState<"idle" | "verifying" | "verified">("idle")
   const [progress, setProgress] = useState(0)
+  
+  const [txData, setTxData] = useState<any>(null)
 
-  const handleVerify = () => {
+  const verificationSteps = [
+    { progress: 0, label: "Starting verification..." },
+    { progress: 30, label: "Certificate ID validated" },
+    { progress: 60, label: "Blockchain record found" },
+    { progress: 80, label: "Certificate hash verified" },
+  ]
+
+  const verifiedDetails = [
+    {
+      label: "Certificate ID",
+      value: metadata?.certificate_id,
+      mono: true,
+    },
+    {
+      label: "Blockchain",
+      value: txData?.network,
+    },
+    {
+      label: "Block Number",
+      value: txData?.blockNumber,
+    },
+    // {
+    //   label: "Block Hash",
+    //   value: txData?.blockHash,
+    //   mono: true,
+    // },
+    {
+      label: "Verification Time",
+      value: new Date().toLocaleString(),
+    },
+  ]
+
+
+
+
+  const handleVerify = async () => {
     setVerificationState("verifying")
     setProgress(0)
 
-    // Simulate verification process
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval)
-          setVerificationState("verified")
-          return 100
-        }
-        return prev + 10
-      })
-    }, 200)
+    try {
+      // 1. Get data from database (Simulated with a timeout)
+      await new Promise((resolve) => setTimeout(resolve, 600))
+      setProgress(30)
+
+
+      // 2. Get the transaction data from the blockchain
+      const transactionData = await axios.get(`/transaction/${txHash}`)
+      const transaction = transactionData.data
+      if (!transaction) {
+        setVerificationState("idle")
+        setProgress(0)
+        return
+      }
+      setTxData(transaction)
+      setProgress(60)
+
+      
+      // 3. Verify the hash on the blockchain
+      const verificationData = await axios.get(`/verify/${hash}`)
+      if (!verificationData) {
+        setVerificationState("idle")
+        setProgress(0)
+        return
+      }
+      setTxData(transaction?.data)
+      setProgress(80)
+
+      // 4. Done
+      setTimeout(() => {
+        setProgress(100)
+        setVerificationState("verified")
+      }, 600)
+      
+    } catch (err) {
+      setVerificationState("idle")
+      setProgress(0)
+      console.error("Error verifying certificate: ", err)
+    }
+  }
+
+
+  const openInExplorer = () => {
+    if (txData) {
+      const etherscanUrl = txData?.explorerUrl || '/'
+      window.open(etherscanUrl, "_blank")
+    }
   }
 
   return (
@@ -57,6 +132,7 @@ export function CertificateVerification({ certificateId }: { certificateId: stri
           </div>
         )}
 
+
         {verificationState === "verifying" && (
           <div className="space-y-4 rounded-lg border border-slate-700 p-6">
             <div className="flex items-center justify-between">
@@ -68,31 +144,22 @@ export function CertificateVerification({ certificateId }: { certificateId: stri
             </div>
             <Progress value={progress} className="h-2 bg-slate-700" indicatorClassName="bg-teal-500" />
             <div className="space-y-2 text-xs text-slate-400">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-3.5 w-3.5 text-emerald-400" />
-                <span>Certificate ID validated</span>
-              </div>
-              {progress >= 30 && (
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-3.5 w-3.5 text-emerald-400" />
-                  <span>Digital signature confirmed</span>
-                </div>
+
+              {verificationSteps.map(
+                (step, idx) =>
+                  progress >= step.progress && (
+                    <div key={idx} className="flex items-center gap-2">
+                      <CheckCircle className="h-3.5 w-3.5 text-emerald-400" />
+                      <span>{step.label}</span>
+                    </div>
+                  )
               )}
-              {progress >= 60 && (
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-3.5 w-3.5 text-emerald-400" />
-                  <span>Blockchain record found</span>
-                </div>
-              )}
-              {progress >= 90 && (
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-3.5 w-3.5 text-emerald-400" />
-                  <span>Certificate hash verified</span>
-                </div>
-              )}
+              
             </div>
           </div>
         )}
+
+
 
         {verificationState === "verified" && (
           <div className="space-y-4 rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-4 lg:p-6">
@@ -107,30 +174,34 @@ export function CertificateVerification({ certificateId }: { certificateId: stri
                 </p>
               </div>
             </div>
-
             <div className="space-y-2 rounded-md bg-slate-800 p-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-400">Certificate ID</span>
-                <span className="font-mono text-xs text-slate-300">{certificateId}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-400">Verification Time</span>
-                <span className="text-xs text-slate-300">{new Date().toLocaleString()}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-400">Blockchain</span>
-                <span className="text-xs text-slate-300">Ethereum</span>
-              </div>
-            </div>
 
+              {verifiedDetails.map((detail, idx) => (
+                <div key={idx} className="flex items-center justify-between">
+                  <span className="text-xs text-slate-400">{detail.label}</span>
+                  <span className={`${detail.mono ? "font-mono" : ""} text-xs text-slate-300`}>
+                    {detail.value}
+                  </span>
+                </div>
+              ))}
+
+            </div>
             <div className="flex items-center justify-between rounded-md bg-slate-800 p-3">
               <span className="text-xs text-slate-400">Verification Hash</span>
-              <Button variant="ghost" size="sm" className="h-6 text-xs text-teal-400 hover:text-teal-300">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 text-xs text-teal-400 hover:text-teal-300"
+                onClick={openInExplorer}
+              >
                 View on Explorer
               </Button>
             </div>
           </div>
         )}
+
+
+
       </div>
     </div>
   )

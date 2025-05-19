@@ -8,8 +8,7 @@ const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "Inovus Labs Certificate Verification",
-  description: "Verify the authenticity of your Inovus Labs certificates",
-    generator: 'v0.dev'
+  description: "Verify the authenticity of your Inovus Labs certificates on the blockchain.",
 }
 
 export default function RootLayout({
