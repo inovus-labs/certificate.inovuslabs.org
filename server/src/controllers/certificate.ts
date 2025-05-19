@@ -107,3 +107,22 @@ export const verifyCertificate = async (req: Request, res: Response) => {
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
+
+
+// Get certificate by ID
+export const getCertificateById = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  try {
+
+    const certificate = await Certificate.find({ 'metadata.certificate_id': id }).select('metadata hash txHash -_id');
+    if (!certificate || certificate.length === 0) {
+      return res.status(404).json({ error: 'Certificate not found' });
+    }
+    return res.status(200).json(certificate[0]);
+
+  } catch (err: any) {
+    console.error("Error fetching certificate: ", err);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
