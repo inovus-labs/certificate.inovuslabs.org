@@ -123,7 +123,7 @@ export const getCertificateById = async (req: Request, res: Response) => {
 
     const certificate = await Certificate.find({ 'metadata.certificate_id': id }).select('metadata hash txHash -_id');
     if (!certificate || certificate.length === 0) {
-      return res.status(404).json({ error: 'Certificate not found' });
+      return res.status(204).json({ message: 'No certificates found' });
     }
     return res.status(200).json(certificate[0]);
 
@@ -166,6 +166,44 @@ export const getTransactionByHash = async (req: Request, res: Response) => {
     
   } catch (err: any) {
     console.error("Error fetching transaction: ", err);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
+
+
+
+// Search certificates by recipient name or Certificate ID
+export const searchCertificates = async (req: Request, res: Response) => {
+  const { query } = req.query;
+  if (!query) {
+    return res.status(400).json({ error: 'Query parameter is required' });
+  }
+  try {
+    const regex = new RegExp(query.toString(), 'i');
+    const certificates = await Certificate.find({
+      $or: [
+        { 'metadata.recipient_name': regex },
+        { 'metadata.certificate_id': regex }
+      ]
+    }).select('metadata -_id');
+
+    if (!certificates || certificates.length === 0) {
+      return res.status(204).json({ message: 'No certificates found' });
+    }
+
+    const result = certificates.map((c: any) => c.metadata);
+    return res.status(200).json(result);
+
+    // const result = certificates.map((c: any) => c.metadata);
+    // let output = result;
+    // if (result.length === 1) {
+    //   output = Array(10).fill(result[0]);
+    // }
+
+    // return res.status(200).json(output);
+
+  } catch (err: any) {
+    console.error("Error searching certificates: ", err);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
