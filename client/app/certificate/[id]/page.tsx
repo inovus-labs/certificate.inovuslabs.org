@@ -82,7 +82,7 @@ export default function CertificatePage() {
         setLoading(true)
         await getCertificateById(id).then((data) => {
           if (!data) {
-            setError(true)
+            router.push(`/search?q=${encodeURIComponent(id)}`)
             return
           }
           setImage(data.image)
@@ -202,10 +202,10 @@ export default function CertificatePage() {
                   </div>
                 ) : (
                   <>
-                    <div className="absolute -right-3 -top-3 rounded-full bg-emerald-500/10 p-2">
+                    {/* <div className="absolute -right-3 -top-3 rounded-full bg-emerald-500/10 p-2">
                       <QrCode className="h-6 w-6 text-emerald-300" />
                     </div>
-                    <QrCodeModal certificateId={metadata?.certificate_id} recipientName={metadata?.recipient_name} />
+                    <QrCodeModal certificateId={metadata?.certificate_id} recipientName={metadata?.recipient_name} /> */}
                     <Image
                       src={image}
                       priority={true}

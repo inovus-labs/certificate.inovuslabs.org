@@ -73,8 +73,7 @@ export function SearchResults({ query }: { query: string }) {
         </div>
         <h3 className="mt-4 text-lg font-medium text-white">No certificates found</h3>
         <p className="mt-2 max-w-md text-sm text-slate-300">
-          We couldn't find any certificates for "{query}". Please check the spelling or try searching with a certificate
-          ID.
+          We couldn't find any certificates for "{query}". Please check the spelling or try searching with a certificate ID.
         </p>
       </div>
     )
@@ -89,10 +88,10 @@ export function SearchResults({ query }: { query: string }) {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {results.map((certificate) => (
+        {results.map((item) => (
           <Link
-            href={`/certificate/${certificate.id}`}
-            key={certificate.id}
+            href={`/certificate/${item?.certificate_id}`}
+            key={item?.certificate_id}
             className="transition-transform hover:scale-[1.02]"
           >
             <Card className="h-full overflow-hidden border-none bg-slate-800/50 transition-all hover:bg-slate-800/80 hover:shadow-lg hover:shadow-teal-900/20 backdrop-blur-sm">
@@ -100,24 +99,24 @@ export function SearchResults({ query }: { query: string }) {
                 <div className="flex flex-col space-y-3">
                   <div className="flex items-center space-x-2 text-teal-400">
                     <Award className="h-5 w-5" />
-                    <span className="font-medium line-clamp-1">{certificate.courseTitle}</span>
+                    <span className="font-medium line-clamp-1">{item?.event_name}</span>
                   </div>
 
                   <div className="flex items-center space-x-2 text-slate-200">
                     <User className="h-4 w-4" />
-                    <span className="line-clamp-1">{certificate.recipientName}</span>
+                    <span className="line-clamp-1">{item?.recipient_name}</span>
                   </div>
 
                   <div className="flex items-center space-x-2 text-slate-400 text-sm">
                     <Calendar className="h-4 w-4" />
-                    <span>Issued: {new Date(certificate.issueDate).toLocaleDateString()}</span>
+                    <span>Issued: {item?.issue_date}</span>
                   </div>
 
                   <div className="flex items-center space-x-2">
                     <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-300">
                       <CheckCircle2 className="mr-1 h-3 w-3" /> Verified
                     </Badge>
-                    <div className="text-xs text-slate-500">ID: {certificate.id}</div>
+                    <div className="text-xs text-slate-500">ID: {item?.certificate_id}</div>
                   </div>
                 </div>
               </CardContent>

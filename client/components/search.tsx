@@ -72,7 +72,7 @@ export function Search() {
       <div className="relative">
         <Input
           type="text"
-          placeholder={isMobile ? "Search..." : "Enter certificate ID or full name"}
+          placeholder={isMobile ? "Search..." : "Enter Certificate ID or full name"}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="h-14 w-full rounded-full border-2 border-teal-500/30 bg-slate-900/50 pl-6 pr-14 text-lg text-white shadow-inner shadow-teal-900/20 transition-all focus-visible:border-teal-500 focus-visible:ring-teal-500"

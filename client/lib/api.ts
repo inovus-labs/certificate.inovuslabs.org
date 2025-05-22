@@ -23,10 +23,13 @@ const axiosInstance = axios.create({
 export const getCertificateById = async (id: string) => {
   try {
     const response = await axiosInstance.get(`/certificate/${id}`);
-    return {
-      ...response.data,
-      image: "https://pub-3a2122f918a54d1492e444aef28f38d7.r2.dev/Sreelakshmi%20Anilkumar.jpg"
-    };
+    if (response.status === 200) {
+      return {
+        ...response.data,
+        image: "https://pub-3a2122f918a54d1492e444aef28f38d7.r2.dev/Sreelakshmi%20Anilkumar.jpg"
+      }
+    }
+    return null;
   } catch (error) {
     console.error("Error fetching certificate:", error);
     return null;
@@ -38,7 +41,10 @@ export const getCertificateById = async (id: string) => {
 // search certificates by name or certificate ID
 export const searchCertificates = async (query: string) => {
   try {
-    return [];
+    const response = await axiosInstance.get(`/search`, {
+      params: { query }
+    });
+    return response.data;
   } catch (error) {
     console.error("Error searching certificates:", error);
     return [];

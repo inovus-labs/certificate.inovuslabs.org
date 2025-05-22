@@ -24,7 +24,7 @@ export function SiteFooter() {
 
         <div className="text-center md:text-right text-sm text-slate-500">
           <span className="text-xs text-slate-500">
-            <a href="/" className="text-slate-400 hover:text-teal-400 transition">Privacy Policy</a> | <a href="/" className="text-slate-400 hover:text-teal-400 transition">Terms of Service</a>
+            <a href="/privacy-policy" className="text-slate-400 hover:text-teal-400 transition">Privacy Policy</a> | <a href="/terms-of-use" className="text-slate-400 hover:text-teal-400 transition">Terms of Service</a>
           </span>
           <br />
           <span className="text-xs text-slate-500">

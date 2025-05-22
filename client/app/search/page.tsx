@@ -8,11 +8,12 @@ import { SearchResults } from "@/components/search-results"
 import { Skeleton } from "@/components/ui/skeleton"
 import { SiteFooter } from "@/components/site-footer"
 
-export default function SearchPage({
+export default async function SearchPage({
   searchParams,
 }: {
   searchParams: { q?: string }
 }) {
+  // In Next.js 13 app router, searchParams is already resolved and not a Promise
   const query = searchParams.q || ""
 
   return (
