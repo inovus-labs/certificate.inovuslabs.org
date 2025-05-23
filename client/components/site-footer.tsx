@@ -29,6 +29,10 @@ export function SiteFooter() {
           <br />
           <span className="text-xs text-slate-500">
             © {new Date().getFullYear()} Inovus Labs. All rights reserved.
+            <br />
+            <span>
+              Powered by <a href="https://github.com/decoded-cipher/inovus-certificate-validator" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-teal-400 transition">inovus-certificate-validator</a> (<a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-teal-400 transition">MIT License</a>)
+            </span>
           </span>
         </div>
 
