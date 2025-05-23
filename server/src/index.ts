@@ -11,7 +11,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: process.env.CLIENT_URL || 'https://certificate.inovuslabs.org',
   methods: ['GET', 'POST', 'PUT', 'DELETE']
 }));
 
