@@ -14,12 +14,12 @@ export default function HomePage() {
     "@type": "WebSite",
     name: "Inovus Labs Certificate Verification",
     description: "Verify the authenticity of your Inovus Labs certificates on the blockchain",
-    url: process.env.NEXT_PUBLIC_BASE_URL || "https://certificate.inovuslabs.org",
+    url: process.env.NEXT_PUBLIC_BASE_URL,
     potentialAction: {
       "@type": "SearchAction",
       target: {
         "@type": "EntryPoint",
-        urlTemplate: `${process.env.NEXT_PUBLIC_BASE_URL || "https://certificate.inovuslabs.org"}/certificate/{search_term_string}`,
+        urlTemplate: `${process.env.NEXT_PUBLIC_BASE_URL}/certificate/{search_term_string}`,
       },
       "query-input": "required name=search_term_string",
     },

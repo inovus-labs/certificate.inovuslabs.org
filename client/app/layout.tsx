@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   authors: [{ name: "Inovus Labs" }],
   creator: "Arjun Krishna",
   publisher: "Inovus Labs",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "https://certificate.inovuslabs.org"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL),
   alternates: {
     canonical: "/",
   },
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     siteName: "Inovus Labs Certificate Verification",
     images: [
       {
-        url: "https://certificate.inovuslabs.org/og-image.png",
+        url: new URL("/og-image.png", process.env.NEXT_PUBLIC_BASE_URL).toString(),
         width: 1200,
         height: 630,
         alt: "Inovus Labs Certificate Verification",
@@ -48,7 +48,15 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Certificate | Inovus Labs",
     description: "Verify the authenticity of your Inovus Labs certificates on the blockchain.",
-    images: ["https://certificate.inovuslabs.org/og-image.png"],
+    images: [
+      {
+        url: new URL("/og-image.png", process.env.NEXT_PUBLIC_BASE_URL).toString(),
+        width: 1200,
+        height: 630,
+        alt: "Inovus Labs Certificate Verification",
+      },
+    ],
+    site: "@inovuslabs",
     creator: "@inovuslabs",
   },
   robots: {
@@ -62,9 +70,9 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  verification: {
-    google: process.env.GOOGLE_SITE_VERIFICATION,
-  },
+  // verification: {
+  //   google: process.env.GOOGLE_SITE_VERIFICATION,
+  // },
 }
 
 export const viewport: Viewport = {
@@ -84,8 +92,8 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
         {/* <link rel="icon" href="/icon.svg" type="image/svg+xml" /> */}
-        {/* <link rel="apple-touch-icon" href="/apple-touch-icon.png" /> */}
-        {/* <link rel="manifest" href="/manifest.json" /> */}
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="manifest" href="/manifest.json" />
       </head>
       <body className={inter.className}>
         <ThemeProvider
