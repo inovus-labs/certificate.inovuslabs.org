@@ -8,10 +8,10 @@ import mongoose from 'mongoose';
 import certificateRouter from './routes/certificate';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'https://certificate.inovuslabs.org',
+  origin: process.env.CLIENT_URL,
   methods: ['GET', 'POST', 'PUT', 'DELETE']
 }));
 
