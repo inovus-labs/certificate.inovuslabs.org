@@ -42,6 +42,21 @@ export default function CertificatePage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
+  const [isOpen, setIsOpen] = useState(false)
+  // Close fullscreen certificate on Escape key press
+  useEffect(() => {
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === "Escape") {
+      setIsOpen(false);
+    }
+  };
+
+    if (isOpen) {
+      window.addEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "hidden"; // optional scroll lock
+    }
+}, [isOpen]);
+
   const certificateDetails = [
     {
       key: "certificate_id",
@@ -214,14 +229,29 @@ export default function CertificatePage() {
                       height={700}
                       className="rounded-lg border-4 border-slate-700 shadow-lg"
                       onError={() => setError(true)}
+                      onClick={() => setIsOpen(true)}
                     />
                   </>
                 )}
-                
               </div>
 
               <CertificateVerification metadata={metadata} txHash={txHash} hash={hash} />
             </Card>
+           
+           {/* onclick certificate full screen */}
+            {isOpen && (
+              <div
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+                onClick={() => setIsOpen(false)}
+              >
+                <img
+                  src={image}
+                  alt="Full Certificate"
+                  className="max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-lg"
+                />
+              </div>
+            )}
+
           </div>
 
           <div>
@@ -306,6 +336,8 @@ export default function CertificatePage() {
       </main>
 
       <SiteFooter />
+      
     </div>
+    
   )
 }
