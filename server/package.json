@@ -7,19 +7,22 @@
   "description": "A blockchain-based certificate validation system.",
   "scripts": {
     "compile": "hardhat compile",
-    "export-abi": "ts-node scripts/export.ts",
-    "build-contracts": "npm run compile && npm run export-abi",
     "deploy": "hardhat run scripts/deploy.ts --network sepolia",
     "dev": "ts-node-dev --respawn src/index.ts",
+    "seed": "ts-node scripts/seeder/index.ts",
     "build": "tsc"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.826.0",
+    "@aws-sdk/s3-request-presigner": "^3.826.0",
     "@openzeppelin/contracts": "^5.3.0",
     "axios": "^1.9.0",
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "mongoose": "^7.0.3",
-    "uuid": "^11.1.0"
+    "multer": "^2.0.1",
+    "uuid": "^11.1.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.2.3",

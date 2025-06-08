@@ -2,8 +2,12 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 
-import { HardhatUserConfig } from "hardhat/config";
 import "@nomiclabs/hardhat-ethers";
+import { HardhatUserConfig } from "hardhat/config";
+
+import { DEFAULT_NETWORK } from "./config/network";
+
+
 
 const config: HardhatUserConfig = {
   solidity: "0.8.20",
@@ -14,7 +18,7 @@ const config: HardhatUserConfig = {
   },
   networks: {
     sepolia: {
-      url: process.env.ALCHEMY_SEPOLIA_RPC_URL || "",
+      url: DEFAULT_NETWORK.rpcUrl,
       accounts: [process.env.PRIVATE_KEY || ""],
     },
   },
