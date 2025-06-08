@@ -1,63 +1,83 @@
 
-import dotenv from 'dotenv';
-dotenv.config();
-
 import axios from 'axios';
 import { ethers } from 'ethers';
 import { Request, Response } from 'express';
 
-import { Certificate, RevokedCertificate } from '../models';
-import CertificateValidator from '../abi/CertificateValidator.json';
+import { saveAuditLog } from './AuditLog';
+import { contract } from '../../config/contract';
+import { getOrCreateUser } from './User';
+import { Certificate, RevokedCertificate, AuditLog } from '../models';
+import { DEFAULT_NETWORK } from '../../config/network';
 
 
-const etherscanApiUrl = "https://api-sepolia.etherscan.io"
 
-const contractAddress = process.env.CONTRACT_ADDRESS;
-const rpcUrl = process.env.ALCHEMY_SEPOLIA_RPC_URL;
-const privateKey = process.env.PRIVATE_KEY;
-const etherscanApiKey = process.env.ETHERSCAN_API_KEY;
-
-
-if (!contractAddress || !rpcUrl || !privateKey || !etherscanApiKey) {
-  throw new Error('Missing CONTRACT_ADDRESS, ALCHEMY_SEPOLIA_RPC_URL, or PRIVATE_KEY in environment variables');
+interface RequestWithUser extends Request {
+  user?: {
+    id: string;
+    name?: string;
+    role?: string;
+  }
 }
 
-
-const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
-const signer = new ethers.Wallet(privateKey, provider);
-const contract = new ethers.Contract(contractAddress, CertificateValidator.abi, signer);
-
-
-
 // Add a certificate to the blockchain
-export const addCertificate = async (req: Request, res: Response) => {
+export const addCertificate = async (req: RequestWithUser, res: Response) => {
+  let {
+    certificate_id,
+    recipient_name,
+    email,
+    mobile,
+    event_id,
+    url,
+    issue_date
+  } = req.body;
+
+  let issued_by = req.user?.id;
+
+  // Validate the request body
+  const requiredFields = ['certificate_id', 'recipient_name', 'email', 'mobile', 'event_id', 'url', 'issue_date'];
   
-  let metadata = req.body;
-  metadata = {
-    ...metadata,
-    issuer: "Amith Abey Stephen",
-    entity: "Inovus Labs IEDC",
+  for (const field of requiredFields) {
+    if (!req.body[field] || typeof req.body[field] !== 'string' || !req.body[field].trim()) {
+      return res.status(400).json({ error: `${field} is required` });
+    }
   }
 
-  const fields = [
-    "certificate_id",
-    "recipient_name",
-    "event_name",
-    "event_type",
-    "event_date",
-    "issue_date",
-    "issuer",
-    "entity",
-  ];
 
-  const sanitize = (value: string) => String(value).replace(/\s+/g, '_');
+  // Check if the user exists, if not create a new user
+  let user = await getOrCreateUser({
+    name: recipient_name,
+    email,
+    mobile
+  });
 
-  const dataString = fields.map((key) => sanitize(metadata[key])).join(' | ');
-  console.log("\nData String: ", dataString);
   
+  // Prepare hash
+  let fields = ['certificate_id', 'recipient_name', 'event_id', 'issue_date', 'issued_by'];
+
+  const sanitize = (value: string | undefined) => String(value ?? '').replace(/\s+/g, '_').trim();
+  const fieldValues: Record<string, string | undefined> = {
+    certificate_id,
+    recipient_name,
+    event_id,
+    issue_date,
+    issued_by,
+  };
+
+  const dataString = fields.map((key) => sanitize(fieldValues[key])).join(' | ');
+
   const hash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(dataString));
-  console.log("Hash: ", hash);
+
+  console.log("Certificate ID:", certificate_id);
+  console.log("Data String:", dataString);
+  console.log("Hash:", hash);
+
   
+  // Check for duplicate certificate
+  const existingCertificate = await Certificate.findOne({ certificate_id });
+  if (existingCertificate) {
+    return res.status(400).json({ error: 'Certificate with this ID already exists' });
+  }
+
 
   try {
     const tx = await contract.storeHash(hash);
@@ -65,25 +85,37 @@ export const addCertificate = async (req: Request, res: Response) => {
 
     console.log("Transaction Hash: ", tx.hash, "\n");
 
-    const explorerUrl = `https://sepolia.etherscan.io/tx/${tx.hash}`;
     await Certificate.create({
-      metadata,
+      certificate_id,
+      user_id: (user as { id: string }).id,
+      // metadata,
       hash,
       txHash: tx.hash,
-      // network: 'Polygon Mumbai',
-      // chainId: 80001,
-      // contractAddress,
-      // explorerUrl
+      event_id,
+      url,
+      issued_at: new Date(issue_date),
+      issued_by,
+    });
+
+    // Save audit log
+    await saveAuditLog({
+      action: 'ADD_CERTIFICATE',
+      user_id: (user as { id: string }).id,
+      txHash: tx.hash,
+      description: `Certificate added with ID: ${certificate_id}`
     });
 
     return res.status(200).json({
       hash,
       txHash: tx.hash,
-      explorerUrl,
+      explorerUrl: `${DEFAULT_NETWORK.blockExplorerUrl}/tx/${tx.hash}`,
     });
 
   } catch (err: any) {
     console.error("Error adding certificate: ", err);
+    if (err.name === 'ValidationError') {
+      return res.status(400).json({ error: err.message });
+    }
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 };
@@ -135,44 +167,7 @@ export const getCertificateById = async (req: Request, res: Response) => {
 
 
 
-// Get Transaction by Hash
-export const getTransactionByHash = async (req: Request, res: Response) => {
-  const { txHash } = req.params;
-  try {
-    const etherscanUrl = `${etherscanApiUrl}/api?chainid=1&module=proxy&action=eth_getTransactionByHash&txhash=${txHash}&apikey=${etherscanApiKey}`;
-
-    const response = await axios.get(etherscanUrl);
-    const transaction = response.data.result;
-    if (!transaction) {
-      return res.status(404).json({ error: 'Transaction not found' });
-    }
-    const { blockHash, blockNumber, from, to, gas } = transaction;
-    const transactionDetails = {
-      blockHash,
-      blockNumber,
-      from,
-      to,
-      // gas,
-      // status: transaction.isError === '0' ? 'Success' : 'Failed',
-    };
-    return res.status(200).json({
-      message: 'Transaction details fetched successfully',
-      data: {
-        ...transactionDetails,
-        network: 'Sepolia Testnet',
-        explorerUrl: `https://sepolia.etherscan.io/tx/${txHash}`,
-      }
-    });
-    
-  } catch (err: any) {
-    console.error("Error fetching transaction: ", err);
-    return res.status(500).json({ error: 'Internal Server Error' });
-  }
-}
-
-
-
-// Search certificates by recipient name or Certificate ID
+// Search certificates by ID or recipient name
 export const searchCertificates = async (req: Request, res: Response) => {
   const { query } = req.query;
   if (!query) {
@@ -180,30 +175,104 @@ export const searchCertificates = async (req: Request, res: Response) => {
   }
   try {
     const regex = new RegExp(query.toString(), 'i');
-    const certificates = await Certificate.find({
-      $or: [
-        { 'metadata.recipient_name': regex },
-        { 'metadata.certificate_id': regex }
-      ]
-    }).select('metadata -_id');
+    const certificates = await Certificate.aggregate([
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'user_id',
+          foreignField: 'id',
+          as: 'user'
+        }
+      },
+      { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+      {
+        $match: {
+          $or: [
+            { certificate_id: regex },
+            { 'user.name': regex }
+          ]
+        }
+      },
+      { $project: { 'user.name': 1, 'certificate_id': 1, '_id': 0 } }
+    ]);    
 
     if (!certificates || certificates.length === 0) {
       return res.status(204).json({ message: 'No certificates found' });
     }
 
-    const result = certificates.map((c: any) => c.metadata);
+    const result = certificates.map(cert => ({
+      certificate_id: cert.certificate_id,
+      recipient_name: cert.user ? cert.user.name : 'Unknown',
+    }));
+
     return res.status(200).json(result);
-
-    // const result = certificates.map((c: any) => c.metadata);
-    // let output = result;
-    // if (result.length === 1) {
-    //   output = Array(10).fill(result[0]);
-    // }
-
-    // return res.status(200).json(output);
 
   } catch (err: any) {
     console.error("Error searching certificates: ", err);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
-}
+};
+
+
+
+// Revoke a certificate
+export const revokeCertificate = async (req: Request, res: Response) => {
+  
+  const revoked_by = (req as any).user?.id;
+  
+  const { certificate_id, reason } = req.body;  
+  const requiredFields = ['certificate_id', 'reason'];
+
+  for (const field of requiredFields) {
+    if (!req.body[field] || typeof req.body[field] !== 'string' || !req.body[field].trim()) {
+      return res.status(400).json({ error: `${field} is required` });
+    }
+  }
+  
+  
+  const certificate = await Certificate.findOne({ certificate_id, status: true });
+  if (!certificate) {
+    return res.status(404).json({ error: 'Certificate not found or already revoked' });
+  }
+
+  const hash = certificate.hash;
+
+  try {
+    const tx = await contract.revokeHash(hash);
+    await tx.wait();
+
+    // Add to RevokedCertificate table
+    await RevokedCertificate.create({
+      certificate_id,
+      revoked_by,
+      reason,
+    });
+
+    // Update status in Certificate table
+    await Certificate.updateOne(
+      { certificate_id },
+      { $set: { status: false } }
+    );
+
+    // Save audit log
+    await saveAuditLog({
+      action: 'REVOKE_CERTIFICATE',
+      user_id: certificate.user_id,
+      txHash: tx.hash,
+      description: `Revoked certificate with ID: ${certificate_id}`
+    });
+
+    console.log("Transaction Hash: ", tx.hash, "\n");
+
+    return res.status(200).json({
+      message: 'Certificate revoked successfully',
+      hash,
+      txHash: tx.hash,
+      explorerUrl: `${DEFAULT_NETWORK.blockExplorerUrl}/tx/${tx.hash}`,
+    });
+
+  } catch (err: any) {
+    console.error("Error revoking certificate: ", err);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};

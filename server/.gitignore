@@ -2,6 +2,7 @@ node_modules/
 artifacts/
 cache/
 dist/
+scripts/seeder/assets/
 
 .DS_Store
 *.log
