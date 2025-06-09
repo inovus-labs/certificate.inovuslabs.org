@@ -5,13 +5,14 @@ import { Shield, CheckCircle, Fingerprint } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
+import { shortAddress } from "@/lib/utils"
 import axios from "@/lib/api";
 
 export function CertificateVerification({ metadata, txHash, hash }: { metadata: any; txHash: string, hash: string }) {
   
   const [verificationState, setVerificationState] = useState<"idle" | "verifying" | "verified">("idle")
   const [progress, setProgress] = useState(0)
-  
+
   const [txData, setTxData] = useState<any>(null)
 
   const verificationSteps = [
@@ -35,11 +36,11 @@ export function CertificateVerification({ metadata, txHash, hash }: { metadata: 
       label: "Block Number",
       value: txData?.blockNumber,
     },
-    // {
-    //   label: "Block Hash",
-    //   value: txData?.blockHash,
-    //   mono: true,
-    // },
+    {
+      label: "Block Hash",
+      value: shortAddress(txData?.blockHash || "", 8),
+      mono: true,
+    },
     {
       label: "Verification Time",
       value: new Date().toLocaleString(),
