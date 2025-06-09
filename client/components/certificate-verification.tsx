@@ -59,7 +59,18 @@ export function CertificateVerification({ metadata, txHash, hash }: { metadata: 
       setProgress(30)
 
 
-      // 2. Get the transaction data from the blockchain
+      // 2. Verify the hash on the blockchain
+      const verificationData = await axios.get(`/certificate/verify/${hash}`)
+      if (!verificationData) {
+        setVerificationState("idle")
+        setProgress(0)
+        return
+      }
+      setTxData(verificationData)
+      setProgress(60)
+      
+      
+      // 3. Get the transaction data from the blockchain
       const transactionData = await axios.get(`/transaction/${txHash}`)
       const transaction = transactionData.data
       if (!transaction) {
@@ -67,19 +78,9 @@ export function CertificateVerification({ metadata, txHash, hash }: { metadata: 
         setProgress(0)
         return
       }
-      setTxData(transaction)
-      setProgress(60)
-
-      
-      // 3. Verify the hash on the blockchain
-      const verificationData = await axios.get(`/certificate/verify/${hash}`)
-      if (!verificationData) {
-        setVerificationState("idle")
-        setProgress(0)
-        return
-      }
-      setTxData(transaction?.data)
+      setTxData(transaction.data)
       setProgress(80)
+
 
       // 4. Done
       setTimeout(() => {
