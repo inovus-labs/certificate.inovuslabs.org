@@ -15,7 +15,7 @@ const sheetName = workbook.SheetNames[0];
 const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
 // Validation function
-function isValid(row) {
+function isValid(row : any): boolean {
   return (
     row.email &&
     row.mobile &&
@@ -34,11 +34,15 @@ function isValid(row) {
 const API_URL = 'http://localhost:8000/certificate/add';
 
 
-function logToFile(message) {
+function logToFile(message : string) {
   fs.appendFileSync(logPath, message + '\n');
 }
 
-async function uploadFileToPresignedUrl(presignedUrl, filePath, fileType) {
+async function uploadFileToPresignedUrl(
+  presignedUrl: any,
+  filePath: any,
+  fileType: any
+): Promise<void> {
   const fileData = fs.readFileSync(filePath);
   await axios.put(presignedUrl, fileData, {
     headers: {
@@ -101,7 +105,7 @@ async function seedCertificates() {
         console.log(msg);
         logToFile(msg);
       }
-    } catch (err) {
+    } catch (err : any) {
       const msg = `Error for ${row.certificate_id}: ${err.response?.data?.error || err.message}`;
       console.error(msg);
       logToFile(msg);
