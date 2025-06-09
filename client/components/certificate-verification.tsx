@@ -72,7 +72,7 @@ export function CertificateVerification({ metadata, txHash, hash }: { metadata: 
 
       
       // 3. Verify the hash on the blockchain
-      const verificationData = await axios.get(`/verify/${hash}`)
+      const verificationData = await axios.get(`/certificate/verify/${hash}`)
       if (!verificationData) {
         setVerificationState("idle")
         setProgress(0)
