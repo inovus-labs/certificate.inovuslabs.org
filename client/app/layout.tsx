@@ -87,15 +87,31 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+
+  const disableRightClick = process.env.NEXT_PUBLIC_ENVIRONMENT === "production"
+
   return (
     <html lang="en" suppressHydrationWarning>
+
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
         {/* <link rel="icon" href="/icon.svg" type="image/svg+xml" /> */}
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/manifest.json" />
       </head>
+      
       <body className={inter.className}>
+        {disableRightClick && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                document.addEventListener('contextmenu', function(e) {
+                  e.preventDefault();
+                });
+              `,
+            }}
+          />
+        )}
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
@@ -106,6 +122,7 @@ export default function RootLayout({
           {children}
         </ThemeProvider>
       </body>
+
     </html>
   )
 }
