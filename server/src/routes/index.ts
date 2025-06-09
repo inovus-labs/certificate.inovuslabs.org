@@ -5,7 +5,7 @@ const router = Router();
 import { authenticate, authorize } from '../middleware';
 import { addManager, removeManager } from '../controllers/User';
 import { getTransactionByHash } from '../controllers/Transaction';
-import { addCertificate, verifyCertificate, revokeCertificate, getCertificateById, searchCertificates } from '../controllers/_Certificate';
+import { addCertificate, verifyCertificate, revokeCertificate, getCertificateById, searchCertificates } from '../controllers/Certificate';
 
 
 
