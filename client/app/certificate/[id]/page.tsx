@@ -19,6 +19,7 @@ import {
   Fingerprint,
   QrCode,
   Loader2,
+  Building2
 } from "lucide-react"
 import { getCertificateById } from "@/lib/api"
 import { Badge } from "@/components/ui/badge"
@@ -28,6 +29,7 @@ import { QrCodeModal } from "@/components/qr-code-modal"
 import { CourseDetails } from "@/components/course-details"
 import { SiteFooter } from "@/components/site-footer"
 import type { Certificate } from "@/lib/types"
+import { formatDate } from "@/lib/utils"
 
 export default function CertificatePage() {
   const params = useParams()
@@ -66,7 +68,7 @@ export default function CertificatePage() {
       key: "issue_date",
       label: "Issue Date",
       icon: <Calendar className="h-5 w-5" />,
-      value: metadata?.issue_date,
+      value: formatDate(metadata?.issue_date),
     },
     {
       key: "duration",
@@ -74,6 +76,12 @@ export default function CertificatePage() {
       icon: <Clock className="h-5 w-5" />,
       value: metadata?.duration,
     },
+    {
+      key: "Issued By",
+      label: "Issued By",
+      icon: <Building2 className="h-5 w-5" />,
+      value: metadata?.issued_by,
+    }
   ]
 
   useEffect(() => {
@@ -85,7 +93,7 @@ export default function CertificatePage() {
             router.push(`/search?q=${encodeURIComponent(id)}`)
             return
           }
-          setImage(data.image)
+          setImage(data.url)
           setMetadata(data.metadata)
           setTxHash(data.txHash)
           setHash(data.hash)

@@ -41,7 +41,7 @@ export const getCertificateById = async (id: string) => {
 // search certificates by name or certificate ID
 export const searchCertificates = async (query: string) => {
   try {
-    const response = await axiosInstance.get(`/search`, {
+    const response = await axiosInstance.get(`/certificate`, {
       params: { query }
     });
     return response.data;

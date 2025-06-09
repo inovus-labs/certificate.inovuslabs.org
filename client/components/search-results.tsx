@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Award, Calendar, User, CheckCircle2 } from "lucide-react"
 import { searchCertificates } from "@/lib/api"
 import type { Certificate } from "@/lib/types"
+import { formatDate } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 
@@ -109,7 +110,7 @@ export function SearchResults({ query }: { query: string }) {
 
                   <div className="flex items-center space-x-2 text-slate-400 text-sm">
                     <Calendar className="h-4 w-4" />
-                    <span>Issued: {item?.issue_date}</span>
+                    <span>  Issued: {formatDate(item?.issue_date)}</span>
                   </div>
 
                   <div className="flex items-center space-x-2">
