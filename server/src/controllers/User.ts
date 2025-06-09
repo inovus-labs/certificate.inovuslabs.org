@@ -68,15 +68,25 @@ export const addManager = async (req: Request, res: Response) => {
 
 // Remove manager from the contract
 export const removeManager = async (req: Request, res: Response) => {
-  const { address, user_id } = req.body;
-  if (!address || !user_id) {
-    return res.status(400).json({ error: 'Address and user_id are required' });
+  const { user_id } = req.body;
+  if (!user_id) {
+    return res.status(400).json({ error: 'user_id is required' });
   }
 
   // const isAdmin = await contract.hasAdminRole(address);
   // if (!isAdmin) {
   //   return res.status(403).json({ error: 'Forbidden: You do not have permission to remove a manager' });
   // }
+
+  const user = await User.findOne({ id: user_id });
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  const address = user.address;
+  if (!address) {
+    return res.status(400).json({ error: 'User does not have an address' });
+  }
   
   const isManager = await contract.hasHashManagerRole(address);
   if (!isManager) {
@@ -87,12 +97,12 @@ export const removeManager = async (req: Request, res: Response) => {
     const tx = await contract.revokeHashManagerRole(address);
     await tx.wait();
 
-    const user = await User.findOneAndUpdate(
+    const updatedUser = await User.findOneAndUpdate(
       { id: user_id },
       { role: 'user', address: null },
       { new: true }
     );
-    if (!user) {
+    if (!updatedUser) {
       return res.status(404).json({ error: 'User not found' });
     }
 
