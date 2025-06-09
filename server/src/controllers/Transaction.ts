@@ -32,7 +32,7 @@ export const getTransactionByHash = async (req: Request, res: Response) => {
       message: 'Transaction details fetched successfully',
       data: {
         ...transactionDetails,
-        network: 'Sepolia Testnet',
+        network: DEFAULT_NETWORK.name,
         explorerUrl: `${DEFAULT_NETWORK.blockExplorerUrl}/tx/${txHash}`,
       }
     });
