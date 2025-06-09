@@ -6,7 +6,7 @@ import { Request, Response } from 'express';
 import { saveAuditLog } from './AuditLog';
 import { contract } from '../../config/contract';
 import { getOrCreateUser } from './User';
-import { Certificate, RevokedCertificate, AuditLog } from '../models';
+import { Certificate, RevokedCertificate, AuditLog, User } from '../models';
 import { DEFAULT_NETWORK } from '../../config/network';
 
 
@@ -152,13 +152,38 @@ export const verifyCertificate = async (req: Request, res: Response) => {
 export const getCertificateById = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
+    const certificates = await Certificate.aggregate([
+      { $match: { certificate_id: id } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'user_id',
+          foreignField: 'id',
+          as: 'user'
+        }
+      },
+      { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+      {
+        $project: {
+          _id: 0,
+          metadata: {
+            recipient_name: '$user.name',
+            certificate_id: '$certificate_id',
+            issue_date: '$issued_at',
+            event_name: '$event_id',
+            issued_by: 'Inovus Labs IEDC'
+          },
+          url: '$url',
+          hash: '$hash',
+          txHash: '$txHash',
+        }
+      }
+    ]);
 
-    const certificate = await Certificate.find({ 'metadata.certificate_id': id }).select('metadata hash txHash -_id');
-    if (!certificate || certificate.length === 0) {
+    if (!certificates || certificates.length === 0) {
       return res.status(204).json({ message: 'No certificates found' });
     }
-    return res.status(200).json(certificate[0]);
-
+    return res.status(200).json(certificates[0]);
   } catch (err: any) {
     console.error("Error fetching certificate: ", err);
     return res.status(500).json({ error: 'Internal Server Error' });
@@ -193,7 +218,15 @@ export const searchCertificates = async (req: Request, res: Response) => {
           ]
         }
       },
-      { $project: { 'user.name': 1, 'certificate_id': 1, '_id': 0 } }
+      {
+        $project: {
+          certificate_id: 1,
+          'user.name': 1,
+          event_id: 1,
+          issued_at: 1,
+          _id: 0
+        }
+      }
     ]);    
 
     if (!certificates || certificates.length === 0) {
@@ -203,6 +236,8 @@ export const searchCertificates = async (req: Request, res: Response) => {
     const result = certificates.map(cert => ({
       certificate_id: cert.certificate_id,
       recipient_name: cert.user ? cert.user.name : 'Unknown',
+      event_name: cert.event_name || cert.event_id,
+      issue_date: cert.issued_at,
     }));
 
     return res.status(200).json(result);

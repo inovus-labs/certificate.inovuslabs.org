@@ -99,7 +99,7 @@ export const removeManager = async (req: Request, res: Response) => {
 
     const updatedUser = await User.findOneAndUpdate(
       { id: user_id },
-      { role: 'user', address: null },
+      { role: 'user', $unset: { address: "" } },
       { new: true }
     );
     if (!updatedUser) {
