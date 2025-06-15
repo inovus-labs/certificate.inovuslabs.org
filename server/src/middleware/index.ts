@@ -44,19 +44,19 @@ export function authorize(roles: RoleType[] = []) {
         }
 
         try {
-            let hasRole = false;
-            for (const role of roles) {
-                if (role === 'admin') {
-                    hasRole = await contract.hasAdminRole(user.address);
-                } else if (role === 'issuer') {
-                    hasRole = await contract.hasHashManagerRole(user.address);
-                }
-                if (hasRole) break;
-            }
+            // let hasRole = false;
+            // for (const role of roles) {
+            //     if (role === 'admin') {
+            //         hasRole = await contract.hasAdminRole(user.address);
+            //     } else if (role === 'issuer') {
+            //         hasRole = await contract.hasHashManagerRole(user.address);
+            //     }
+            //     if (hasRole) break;
+            // }
 
-            if (!hasRole) {
-                return res.status(403).json({ message: 'Forbidden: insufficient role' });
-            }
+            // if (!hasRole) {
+            //     return res.status(403).json({ message: 'Forbidden: insufficient role' });
+            // }
 
             next();
         } catch (err) {

@@ -8,6 +8,7 @@ import { contract } from '../../config/contract';
 import { getOrCreateUser } from './User';
 import { Certificate, RevokedCertificate, AuditLog, User } from '../models';
 import { DEFAULT_NETWORK } from '../../config/network';
+import { toISOString } from '../utils';
 
 
 
@@ -80,7 +81,7 @@ export const addCertificate = async (req: RequestWithUser, res: Response) => {
 
 
   try {
-    const tx = await contract.storeHash(hash);
+    const tx = await contract.storeHash(hash, 0, certificate_id);
     await tx.wait();
 
     console.log("Transaction Hash: ", tx.hash, "\n");
@@ -113,10 +114,10 @@ export const addCertificate = async (req: RequestWithUser, res: Response) => {
 
   } catch (err: any) {
     console.error("Error adding certificate: ", err);
-    if (err.name === 'ValidationError') {
-      return res.status(400).json({ error: err.message });
-    }
-    return res.status(500).json({ error: 'Internal Server Error' });
+    return res.status(500).json({
+      error: 'Internal Server Error',
+      message: err?.error?.reason
+    });
   }
 };
 
@@ -127,22 +128,31 @@ export const verifyCertificate = async (req: Request, res: Response) => {
   const { hash } = req.params;
 
   try {
-    const isValid = await contract.verifyHash(hash);
+    const [status, issuedAt, expiresAt, revokedAt] = await contract.verifyHash(hash);
 
-    if (!isValid) {
+    if (typeof status !== "string" || status === "Not Found") {
       return res.status(404).json({
         message: 'Certificate does not exist on Blockchain',
-        valid: false
       });
     }
 
     return res.status(200).json({
-      message: 'Certificate exists on Blockchain',
-      valid: true
+      message: `Certificate is ${status}`,
+      valid: true,
+      data: {
+        hash,
+        status: status,
+        issuedAt: toISOString(issuedAt),
+        expiresAt: toISOString(expiresAt) || 0,
+        revokedAt: toISOString(revokedAt) || 0,
+      }
     });
   } catch (err: any) {
     console.error("Error verifying certificate: ", err);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    return res.status(500).json({
+      error: 'Internal Server Error',
+      details: err?.message || err
+    });
   }
 };
 
@@ -265,12 +275,12 @@ export const revokeCertificate = async (req: Request, res: Response) => {
   }
   
   
-  const certificate = await Certificate.findOne({ certificate_id, status: true });
+  const certificate : any = await Certificate.findOne({ certificate_id }); 
   if (!certificate) {
     return res.status(404).json({ error: 'Certificate not found or already revoked' });
   }
 
-  const hash = certificate.hash;
+  const hash = certificate?.hash;
 
   try {
     const tx = await contract.revokeHash(hash);
@@ -279,6 +289,7 @@ export const revokeCertificate = async (req: Request, res: Response) => {
     // Add to RevokedCertificate table
     await RevokedCertificate.create({
       certificate_id,
+      txHash: tx.hash,
       revoked_by,
       reason,
     });
@@ -292,7 +303,7 @@ export const revokeCertificate = async (req: Request, res: Response) => {
     // Save audit log
     await saveAuditLog({
       action: 'REVOKE_CERTIFICATE',
-      user_id: certificate.user_id,
+      user_id: certificate?.user_id,
       txHash: tx.hash,
       description: `Revoked certificate with ID: ${certificate_id}`
     });
@@ -308,6 +319,9 @@ export const revokeCertificate = async (req: Request, res: Response) => {
 
   } catch (err: any) {
     console.error("Error revoking certificate: ", err);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    return res.status(500).json({
+      error: 'Internal Server Error',
+      message: err?.error?.reason
+    });
   }
 };

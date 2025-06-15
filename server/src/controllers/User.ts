@@ -18,11 +18,6 @@ export const addManager = async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Address, name, email, and mobile are required' });
   }
 
-  const isAdmin = await contract.hasAdminRole(address);
-  if (!isAdmin) {
-    return res.status(403).json({ error: 'Forbidden: You do not have permission to add a manager' });
-  }
-
   try {
     const newUser: any = await getOrCreateUser({
       name,
@@ -34,15 +29,9 @@ export const addManager = async (req: Request, res: Response) => {
     if (newUser instanceof Error) {
       return res.status(500).json({ error: newUser.message });
     }
-    
-    // Grant the manager role to the address
-    const isManager = await contract.hasHashManagerRole(address);
-    if (isManager) {
-      return res.status(400).json({ error: 'Address already has manager role' });
-    }
 
     // Grant the manager role
-    const tx = await contract.grantHashManagerRole(address);
+    const tx = await contract.addHashManager(address);
     await tx.wait();
 
     await saveAuditLog({
@@ -59,8 +48,10 @@ export const addManager = async (req: Request, res: Response) => {
     });
 
   } catch (err: any) {
-    console.error("Error adding manager: ", err);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    return res.status(500).json({
+      error: 'Internal Server Error',
+      message: err?.error?.reason
+    });
   }
 }
 
@@ -73,11 +64,6 @@ export const removeManager = async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'user_id is required' });
   }
 
-  // const isAdmin = await contract.hasAdminRole(address);
-  // if (!isAdmin) {
-  //   return res.status(403).json({ error: 'Forbidden: You do not have permission to remove a manager' });
-  // }
-
   const user = await User.findOne({ id: user_id });
   if (!user) {
     return res.status(404).json({ error: 'User not found' });
@@ -87,14 +73,9 @@ export const removeManager = async (req: Request, res: Response) => {
   if (!address) {
     return res.status(400).json({ error: 'User does not have an address' });
   }
-  
-  const isManager = await contract.hasHashManagerRole(address);
-  if (!isManager) {
-    return res.status(400).json({ error: 'Address does not have manager role' });
-  }
 
   try {
-    const tx = await contract.revokeHashManagerRole(address);
+    const tx = await contract.removeHashManager(address);
     await tx.wait();
 
     const updatedUser = await User.findOneAndUpdate(
@@ -120,8 +101,10 @@ export const removeManager = async (req: Request, res: Response) => {
     });
 
   } catch (err: any) {
-    console.error("Error removing manager: ", err);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    return res.status(500).json({
+      error: 'Internal Server Error',
+      message: err?.error?.reason
+    });
   }
 }
 
@@ -129,41 +112,44 @@ export const removeManager = async (req: Request, res: Response) => {
 
 // Get or create a user
 export const getOrCreateUser = async (body: { name: string; email: string; mobile: string; role?: string; address?: string; status?: string }) => {
-  return new Promise((resolve, reject) => {
-
-    const { name, email, mobile, role, address } = body;
+  return new Promise(async (resolve, reject) => {
+    const { name, email, mobile, role, address, status } = body;
 
     if (!name || !email || !mobile) {
       reject(new Error('Name, email, and mobile are required'));
       return;
     }
 
-    User.findOne({ $or: [{ email }, { mobile }] })
-      .select('-__v -createdAt -updatedAt')
-      .then(existingUser => {
-        if (existingUser) {
-          resolve(existingUser);
-          return;
-        }
+    try {
+      // Try to find and update the user if exists
+      const updateFields: any = { name };
+      if (role) updateFields.role = role;
+      if (address) updateFields.address = address;
+      if (status) updateFields.status = status;
 
-        const newUserData: any = { name, email, mobile };
-        if (role) newUserData.role = role;
-        if (address) newUserData.address = address;
+      const updatedUser = await User.findOneAndUpdate(
+        { $or: [{ email }, { mobile }] },
+        { $set: updateFields },
+        { new: true }
+      ).select('-__v -createdAt -updatedAt');
 
-        const newUser = new User(newUserData);
+      if (updatedUser) {
+        resolve(updatedUser);
+        return;
+      }
 
-        newUser.save()
-          .then(savedUser => {
-            resolve(savedUser);
-          })
-          .catch(err => {
-            reject(new Error(`Error saving user: ${err.message}`));
-          });
-      })
-      .catch(err => {
-        reject(new Error(`Error creating user: ${err.message}`));
-      });
-      
+      // If not found, create new user
+      const newUserData: any = { name, email, mobile };
+      if (role) newUserData.role = role;
+      if (address) newUserData.address = address;
+      if (status) newUserData.status = status;
+
+      const newUser = new User(newUserData);
+      const savedUser = await newUser.save();
+      resolve(savedUser);
+    } catch (err: any) {
+      reject(new Error(`Error in getOrCreateUser: ${err.message}`));
+    }
   });
 }
 

@@ -23,6 +23,10 @@ const RevokedCertificateSchema = new mongoose.Schema({
         },
         index: true,
     },
+    txHash: {
+        type: String,
+        required: true,
+    },
     revoked_by: {
         type: String,
         required: true,
@@ -43,17 +47,6 @@ const RevokedCertificateSchema = new mongoose.Schema({
                 return v.length > 0 && v.length <= 500;
             },
             message: (props: { value: string }) => `Reason must be between 1 and 500 characters!`
-        }
-    },
-    revoked_at: {
-        type: Date,
-        default: Date.now,
-        required: true,
-        validate: {
-            validator: function (v: Date): boolean {
-                return v <= new Date();
-            },
-            message: (props: { value: Date }) => `Revoked date cannot be in the future!`
         }
     }
 }, {
