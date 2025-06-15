@@ -2,7 +2,9 @@ node_modules/
 artifacts/
 cache/
 dist/
-scripts/seeder/assets/
+
+scripts/seeder/*
+!scripts/seeder/index.ts
 
 .DS_Store
 *.log
