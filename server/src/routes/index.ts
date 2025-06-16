@@ -27,8 +27,8 @@ transactionRouter.get('/:txHash', getTransactionByHash);
 
 
 // User Router
-userRouter.post('/add-mgr', authenticate, authorize(['admin']), addManager);
-userRouter.post('/revoke-mgr', authenticate, authorize(['admin']), removeManager);
+userRouter.post('/add-mgr', addManager);
+userRouter.post('/revoke-mgr', removeManager);
 
 
 router.use('/certificate', certificateRouter);

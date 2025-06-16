@@ -1,8 +1,14 @@
 
+import dotenv from "dotenv";
+dotenv.config();
+
 const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
 const XLSX = require('xlsx');
+
+import { generatePreSignedUrl } from '../../src/controllers/Media';
+import { SerialDateToISOString } from '../../src/utils';
 
 // Path to your Excel file and log file
 const excelPath = path.join(__dirname, 'certificates.xlsx');
@@ -22,11 +28,7 @@ function isValid(row : any): boolean {
     row.event_id &&
     row.certificate_id &&
     row.recipient_name &&
-    row.event_name &&
-    row.event_type &&
-    row.event_date &&
-    row.issue_date &&
-    row.location
+    row.issue_date
   );
 }
 
@@ -34,46 +36,58 @@ function isValid(row : any): boolean {
 const API_URL = 'http://localhost:8000/certificate/add';
 
 
-function logToFile(message : string) {
-  fs.appendFileSync(logPath, message + '\n');
-}
+export const uploadFileToPresignedUrl = async (
+  presignedUrl: string,
+  filePath: string,
+  fileType: string
+): Promise<boolean> => {
+  try {
+    const fileData = fs.readFileSync(filePath);
+    const response = await axios.put(presignedUrl, fileData, {
+      headers: {
+        'Content-Type': fileType,
+      }
+    });
+    return true;
+  } catch (error) {
+    console.log(`Error uploading file to presigned URL: ${error}`);
+    return false;
+  }
+};
 
-async function uploadFileToPresignedUrl(
-  presignedUrl: any,
-  filePath: any,
-  fileType: any
-): Promise<void> {
-  const fileData = fs.readFileSync(filePath);
-  await axios.put(presignedUrl, fileData, {
-    headers: {
-      'Content-Type': fileType,
-    },
-    maxContentLength: Infinity,
-    maxBodyLength: Infinity,
-  });
-}
 
 async function seedCertificates() {
+  console.log(`Starting seeding process...\n`);
+
   for (const row of data) {
     if (!isValid(row)) {
       const msg = `Invalid row skipped: ${JSON.stringify(row)}`;
       console.log(msg);
-      logToFile(msg);
       continue;
     }
 
-    try {
-      // Prepare metadata for /add endpoint
-      const metadata = { ...row };
+    console.log(`Processing row no. ${data.indexOf(row) + 1} ...`);
 
-      // If image_path is present, add fileName and fileType
-      let filePath, fileName, fileType;
-      if (row.image_path) {
-        filePath = path.join(__dirname, 'assets', row.image_path);
+    try {
+      const imagePath = row.url;
+      const metadata = {
+        email: row.email,
+        mobile: String(row.mobile),
+        event_id: row.event_id,
+        certificate_id: row.certificate_id,
+        recipient_name: row.recipient_name,
+        issue_date: SerialDateToISOString(row.issue_date),
+        url: ''
+      };
+
+      let filePath, fileName, fileType, fileUrl;
+
+      if (imagePath) {
+        filePath = path.join(__dirname, 'assets', imagePath);
+
         if (fs.existsSync(filePath)) {
-          fileName = path.basename(filePath);
-          // Guess file type from extension (simple, for demo)
-          const ext = path.extname(fileName).toLowerCase();
+          const ext = path.extname(imagePath).toLowerCase();
+          fileName = `${row.certificate_id}${ext}`;
           fileType =
             ext === '.png'
               ? 'image/png'
@@ -82,35 +96,44 @@ async function seedCertificates() {
               : ext === '.pdf'
               ? 'application/pdf'
               : 'application/octet-stream';
-          metadata.fileName = fileName;
-          metadata.fileType = fileType;
+
+          // 1. Get presigned URL for upload
+          const presignedUrl = await generatePreSignedUrl(fileName, fileType);
+          console.log(`Generated presigned URL for file ${fileName} ...`);
+
+          // 2. Upload file to presigned URL
+          await uploadFileToPresignedUrl(presignedUrl as string, filePath, fileType);
+          console.log(`File uploaded successfully ...`);
+
+          // 3. Set file URL in metadata (assuming public URL follows a pattern)
+          fileUrl = `${process.env.CLOUDFLARE_R2_BUCKET_URL}/${fileName}`;
+          metadata.url = fileUrl;
+          
         } else {
           filePath = null;
         }
       }
 
-      // 1. Send metadata to /add endpoint
+      // 4. Send metadata to /add endpoint
       const res = await axios.post(API_URL, metadata, {
         headers: { 'Content-Type': 'application/json' },
       });
-
-      // 2. If presignedUrl is returned and file exists, upload the file
-      if (res.data.presignedUrl && filePath) {
-        await uploadFileToPresignedUrl(res.data.presignedUrl, filePath, fileType);
-        const msg = `Success: ${row.certificate_id} (file uploaded)`;
-        console.log(msg);
-        logToFile(msg);
+      if (res.status === 200) {
+        console.log(`Row processed successfully\n`);
+        console.log(res.data);
       } else {
-        const msg = `Success: ${row.certificate_id} (no file uploaded)`;
-        console.log(msg);
-        logToFile(msg);
+        console.log(`Failed to process row: ${JSON.stringify(row)}`);
       }
     } catch (err : any) {
-      const msg = `Error for ${row.certificate_id}: ${err.response?.data?.error || err.message}`;
-      console.error(msg);
-      logToFile(msg);
+      console.log(err)
+      process.exit(1);
+    } finally {
+      console.log(`\n------------------------------------------------------------------------\n`);
     }
   }
+
+  console.log(`Seeding process completed.`);
 }
+
 
 seedCertificates();
