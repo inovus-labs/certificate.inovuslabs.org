@@ -13,7 +13,7 @@ if (!process.env.CONTRACT_NAME) {
 
 
 async function main() {
-	const ContractFactory = await ethers.getContractFactory(process.env.CONTRACT_NAME);
+	const ContractFactory = await ethers.getContractFactory(process.env.CONTRACT_NAME!);
 	const contract = await ContractFactory.deploy();
 
 	await contract.deployed();

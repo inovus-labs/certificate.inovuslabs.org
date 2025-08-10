@@ -5,13 +5,14 @@ import { Shield, CheckCircle, Fingerprint } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
+import { shortAddress } from "@/lib/utils"
 import axios from "@/lib/api";
 
 export function CertificateVerification({ metadata, txHash, hash }: { metadata: any; txHash: string, hash: string }) {
   
   const [verificationState, setVerificationState] = useState<"idle" | "verifying" | "verified">("idle")
   const [progress, setProgress] = useState(0)
-  
+
   const [txData, setTxData] = useState<any>(null)
 
   const verificationSteps = [
@@ -35,11 +36,11 @@ export function CertificateVerification({ metadata, txHash, hash }: { metadata: 
       label: "Block Number",
       value: txData?.blockNumber,
     },
-    // {
-    //   label: "Block Hash",
-    //   value: txData?.blockHash,
-    //   mono: true,
-    // },
+    {
+      label: "Block Hash",
+      value: shortAddress(txData?.blockHash || "", 8),
+      mono: true,
+    },
     {
       label: "Verification Time",
       value: new Date().toLocaleString(),
@@ -59,7 +60,18 @@ export function CertificateVerification({ metadata, txHash, hash }: { metadata: 
       setProgress(30)
 
 
-      // 2. Get the transaction data from the blockchain
+      // 2. Verify the hash on the blockchain
+      const verificationData = await axios.get(`/certificate/verify/${hash}`)
+      if (!verificationData) {
+        setVerificationState("idle")
+        setProgress(0)
+        return
+      }
+      setTxData(verificationData)
+      setProgress(60)
+      
+      
+      // 3. Get the transaction data from the blockchain
       const transactionData = await axios.get(`/transaction/${txHash}`)
       const transaction = transactionData.data
       if (!transaction) {
@@ -67,19 +79,9 @@ export function CertificateVerification({ metadata, txHash, hash }: { metadata: 
         setProgress(0)
         return
       }
-      setTxData(transaction)
-      setProgress(60)
-
-      
-      // 3. Verify the hash on the blockchain
-      const verificationData = await axios.get(`/verify/${hash}`)
-      if (!verificationData) {
-        setVerificationState("idle")
-        setProgress(0)
-        return
-      }
-      setTxData(transaction?.data)
+      setTxData(transaction.data)
       setProgress(80)
+
 
       // 4. Done
       setTimeout(() => {

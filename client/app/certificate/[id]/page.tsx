@@ -19,6 +19,9 @@ import {
   Fingerprint,
   QrCode,
   Loader2,
+  Building2,
+  Hourglass,
+  ImageOff
 } from "lucide-react"
 import { getCertificateById } from "@/lib/api"
 import { Badge } from "@/components/ui/badge"
@@ -28,6 +31,7 @@ import { QrCodeModal } from "@/components/qr-code-modal"
 import { CourseDetails } from "@/components/course-details"
 import { SiteFooter } from "@/components/site-footer"
 import type { Certificate } from "@/lib/types"
+import { formatDate } from "@/lib/utils"
 
 export default function CertificatePage() {
   const params = useParams()
@@ -66,7 +70,13 @@ export default function CertificatePage() {
       key: "issue_date",
       label: "Issue Date",
       icon: <Calendar className="h-5 w-5" />,
-      value: metadata?.issue_date,
+      value: formatDate(metadata?.issue_date),
+    },
+    {
+      key: "expiry_date",
+      label: "Expiry Date",
+      icon: <Hourglass className="h-5 w-5" />,
+      value: formatDate(metadata?.expires_at)
     },
     {
       key: "duration",
@@ -74,6 +84,12 @@ export default function CertificatePage() {
       icon: <Clock className="h-5 w-5" />,
       value: metadata?.duration,
     },
+    {
+      key: "Issued By",
+      label: "Issued By",
+      icon: <Building2 className="h-5 w-5" />,
+      value: metadata?.issued_by,
+    }
   ]
 
   useEffect(() => {
@@ -85,7 +101,7 @@ export default function CertificatePage() {
             router.push(`/search?q=${encodeURIComponent(id)}`)
             return
           }
-          setImage(data.image)
+          setImage(data.url)
           setMetadata(data.metadata)
           setTxHash(data.txHash)
           setHash(data.hash)
@@ -200,22 +216,29 @@ export default function CertificatePage() {
                   <div className="flex h-[500px] items-center justify-center bg-slate-900 rounded-lg border-4 border-slate-700 shadow-lg animate-pulse">
                     <Loader2 className="h-12 w-12 animate-spin text-teal-500" />
                   </div>
-                ) : (
-                  <>
-                    {/* <div className="absolute -right-3 -top-3 rounded-full bg-emerald-500/10 p-2">
-                      <QrCode className="h-6 w-6 text-emerald-300" />
+                ) : error || !image ? (
+                  <div className="flex flex-col items-center justify-center h-[500px] bg-slate-900 rounded-lg border-4 border-slate-700 shadow-lg">
+                    <div className="flex flex-col items-center">
+                      <ImageOff className="h-20 w-20 text-slate-600 mb-4" strokeWidth={1.5} />
+                      <span className="text-xl font-semibold text-slate-300 mb-1">No Certificate Image</span>
+                      <span className="text-slate-500 mt-3 text-sm text-center">
+                        The certificate image could not be loaded.<br />
+                        Please check the certificate link or contact support if you believe this is an error.
+                      </span>
                     </div>
-                    <QrCodeModal certificateId={metadata?.certificate_id} recipientName={metadata?.recipient_name} /> */}
-                    <Image
-                      src={image}
-                      priority={true}
-                      alt="Certificate"
-                      width={1000}
-                      height={700}
-                      className="rounded-lg border-4 border-slate-700 shadow-lg"
-                      onError={() => setError(true)}
-                    />
-                  </>
+                  </div>
+                ) : (
+                  <Image
+                    src={image}
+                    priority={true}
+                    alt="Certificate"
+                    width={1000}
+                    height={700}
+                    className="rounded-lg border-4 border-slate-700 shadow-lg"
+                    onError={() => {
+                      setError(true)
+                    }}
+                  />
                 )}
                 
               </div>
